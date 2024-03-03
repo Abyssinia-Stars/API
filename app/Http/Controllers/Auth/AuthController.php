@@ -23,12 +23,17 @@ class AuthController extends Controller
         $validation = Validator::make($request->all() ,[
             'name' => 'required|max:55',
             'email' => 'email|required|unique:users',
-            'password' => 'required|confirmed'
+            'password' => 'required|confirmed',
+            'role' => 'required|in:artist,manager,customer',
+            'phone_number' => ['required','regex:/^(\+251|251|0)?9\d{8}$/'],
+            'profile_picture' => 'optional|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
          ]);
          
+         
+        //  echo $request;
 
         if($validation->fails()) {
-            return response()->json(['error' => $validation->errors()], 401);
+            return response()->json(['error' => $validation->errors()], 400);
          
         }
         $validatedData = $request->all();
