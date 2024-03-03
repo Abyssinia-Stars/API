@@ -24,3 +24,4 @@ Route::get('/login', 'App\Http\Controllers\Auth\AuthController@loginView')->name
 Route::get('/email/notice', 'App\Http\Controllers\Auth\VerificationController@notice')->name('verification.notice');
 Route::get('/email/verify/{id}/{hash}', 'App\Http\Controllers\Auth\VerificationController@verify')->name('verification.verify');
 Route::post('/email/resend', 'App\Http\Controllers\Auth\VerificationController@resend')->middleware(['throttle:6,1'])->name('verification.resend');
+Route::post('/upload-image',  'App\Http\Controllers\FileUpload\UserProfileController@store');
