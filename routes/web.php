@@ -29,3 +29,12 @@ Route::controller(VerificationController::class)->group(function () {
     Route::get('/email/verify/{id}/{hash}', 'verify')->name('verification.verify');
     Route::get('/email/resend', 'resend')->name('verification.resend');
 })->middleware(['auth','signed'])->name('verification.verify');
+
+
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
+
+Route::get('/reset-password/{token}', function (string $token) {
+    return view('auth.reset-password', ['token' => $token]);
+})->middleware('guest')->name('password.reset');
