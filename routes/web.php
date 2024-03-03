@@ -1,5 +1,6 @@
 <?php
 
+namespace App\Http\Controllers\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 /*
@@ -13,20 +14,18 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 |
 */
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// Route::get('/login', function () {
+//     return view('auth.login');
+// })->name('login');
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name("auth.register");
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/register', 'registerUser')->name("auth.register");
+    Route::get('/login', 'loginUser')->name("auth.login");
+});
 
-Route::get('/email/verify', function () {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
 
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
- 
-    return redirect('/login'); 
-})->middleware(['auth', 'signed'])->name('verification.verify');
+Route::controller(VerificationController::class)->group(function () {
+    Route::get('/email/verify', 'notice')->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', 'verify')->name('verification.verify');
+    Route::get('/email/resend', 'resend')->name('verification.resend');
+})->middleware(['auth','signed'])->name('verification.verify');

@@ -14,7 +14,11 @@ class AuthController extends Controller
 {
 
     
+    public function loginView() {
+        return view('auth.login');
+    }
     public function registerUser(Request $request){
+
 
         $validation = Validator::make($request->all() ,[
             'name' => 'required|max:55',
