@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\ArtistProfileController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,3 +29,7 @@ Route::post('/email/resend', 'App\Http\Controllers\Auth\VerificationController@r
 Route::post('/upload-image',  'App\Http\Controllers\FileUpload\UserProfileController@store');
 Route::post('/forgot-password', 'App\Http\Controllers\Auth\ResetPasswordController@forgotPassword')->name('password.request');
 Route::post('/reset-password', 'App\Http\Controllers\Auth\ResetPasswordController@resetPassword')->name('password.update');
+
+Route::get('/artist-profile', [ArtistProfileController::class, 'index']);
+Route::post('/artist-profile', [ArtistProfileController::class, 'store']);
+Route::get('/artist-profile/{id}', [ArtistProfileController::class, 'show']);
