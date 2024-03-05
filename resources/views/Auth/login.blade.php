@@ -15,6 +15,7 @@
         <input type="password" name="password" placeholder="password" required>
 
         <input type="submit" value="Login">
+        <a href="{{ route('google.redirect') }}" class="btn btn-primary"> Login with Google </a>
         </form>
     
 </body>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use \Illuminate\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\Registered;
@@ -20,13 +21,18 @@ class AuthController extends Controller
     public function registerUser(Request $request){
 
 
+        $request->merge([
+            'user_name' => $request->get('name') . str_pad(mt_rand(1,99999999),8,'0',STR_PAD_LEFT),
+        ]);
+        
         $validation = Validator::make($request->all() ,[
             'name' => 'required|max:55',
             'email' => 'email|required|unique:users',
             'password' => 'required|confirmed',
             'role' => 'required|in:artist,manager,customer',
             'phone_number' => ['required','regex:/^(\+251|251|0)?9\d{8}$/'],
-            'profile_picture' => 'optional|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'profile_picture' => 'optional|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            "user_name" => "required|unique:users"
          ]);
          
          
@@ -43,9 +49,9 @@ class AuthController extends Controller
         $user = User::create($validatedData);
 
         event(new Registered($user));
-        $accessToken = $user->createToken('authToken')->accessToken;
+      
 
-        return response()->json(['user' => $user, 'access_token' => $accessToken]);
+        return response()->json(['user' => $user, 'message' => 'User created successfully']);
 
 
 
@@ -53,19 +59,40 @@ class AuthController extends Controller
 
     public function loginUser(Request $request) {
        
-        $loginData = $request->validate([
+ 
+        $validation = Validator::make($request->all() ,[
             'email' => 'email|required',
             'password' => 'required'
-        ]);
+         ]);
 
-        if(!auth()->attempt($loginData)) {
-            return response()->json(['message' => 'Invalid Credentials']);
+        if($validation->fails()){
+            return response()->json(['error' => $validation->errors()], 400);
         }
 
-        $accessToken = auth()->user()->createToken('authToken')->accessToken;
+        $loginData = $request->all();
+        
 
-        return response()->json(['user' => auth()->user(), 'access_token' => $accessToken]);
+
+        if(Auth::attempt($loginData)) {
+            $user = Auth::user();
+            if($user->hasVerifiedEmail()){
+                $accessToken = $user->createToken('authToken')->accessToken;
+                return response()->json(['user' => $user, 'access_token' => $accessToken]);
+            }
+            else{
+                return response()->json(['message' => 'Email not verified']);
+            }
+        }
+
+        return response()->json(['message' => 'Invalid Credentials']);
+ 
 
     }
-    //
+    public function logout(Request $request)
+    {
+
+        $request->user()->token()->revoke();
+
+        return response()->json(['message' => 'Successfully logged out.']);
+    }
 }

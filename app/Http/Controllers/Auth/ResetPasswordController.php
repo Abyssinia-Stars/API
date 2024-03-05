@@ -35,7 +35,7 @@ class ResetPasswordController extends Controller
     public function resetPassword (Request $request) {
         // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
   
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [ 
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|min:8|confirmed',

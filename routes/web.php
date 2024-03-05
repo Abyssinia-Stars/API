@@ -14,15 +14,17 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 |
 */
 
-// Route::get('/login', function () {
-//     return view('auth.login');
-// })->name('login');
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 
-Route::controller(AuthController::class)->group(function () {
-    Route::get('/register', 'registerUser')->name("auth.register");
-    Route::get('/login', 'loginUser')->name("auth.login");
-});
+// Route::controller(AuthController::class)->group(function () {
+//     Route::get('/register', 'registerUser')->name("auth.register");
+//     Route::get('/login', 'loginUser')->name("auth.login");
+// });
 
+Route::get('/google/redirect', [GoogleLoginController::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('/google/callback', [GoogleLoginController::class, 'handleGoogleCallback'])->name('google.callback');
 
 Route::controller(VerificationController::class)->group(function () {
     Route::get('/email/verify', 'notice')->name('verification.notice');
