@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Otp as OtpModel;
 use Illuminate\Support\Facades\Auth;
 
 class VerificationController extends Controller
@@ -26,6 +27,9 @@ class VerificationController extends Controller
 
         if (!$user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
+            $otpuser = OtpModel::where('identifier', $user->email)->first();
+            $otpuser->valid = 0;
+            $otpuser->save();
             return response()->json(["message" => "Email verified."], 200);
 
         }

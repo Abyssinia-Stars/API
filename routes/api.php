@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\FileUpload\UserProfileController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\GoogleLoginController;
+use App\Http\Controllers\Auth\OtpVerifyController;
 
 
 /*
@@ -26,6 +27,11 @@ Route::middleware('auth:api')->group(function () {
         return response()->json(['user' => "Alemu SISAY IT WORKS"], 200);
        });
 
+});
+
+Route::controller(OtpVerifyController::class)->group(function(){
+    Route::post("/verify-otp", [OtpVerifyController::class, 'verify'])->name('otp.verify');
+    Route::post('/resend-otp', 'resendOtp')->name('otp.resend');
 });
 
 Route::controller(AuthController::class)->group(function(){

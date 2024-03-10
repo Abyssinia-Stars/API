@@ -29,7 +29,7 @@ class ResetPasswordController extends Controller
         // error_log($status);
         return $status === Password::RESET_LINK_SENT
                     ? response()->json(['message' => __($status)], 200)
-                    : response()->json(['message' => __($status)], 401);
+                    : response()->json(['error' => __($status)], 401);
     }
 
     public function resetPassword (Request $request) {
@@ -38,7 +38,7 @@ class ResetPasswordController extends Controller
         $validator = Validator::make($request->all(), [ 
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
+            'password' => 'required|min:6|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -61,8 +61,8 @@ class ResetPasswordController extends Controller
             // $out->writeln(Password::PASSWORD_RESET);
      
         return $status === Password::PASSWORD_RESET
-                    ? response()->json(['message' => __($status)], 200)
-                    : response()->json(['message' => __($status)], 401);
+                    ? response()->json(['message' => "Password Chaneged"], 200)
+                    : response()->json(['error' => "Something went wrong!"], 401);
     }
 
 

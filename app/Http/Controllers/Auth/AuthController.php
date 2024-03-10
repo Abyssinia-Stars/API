@@ -21,6 +21,10 @@ class AuthController extends Controller
     public function registerUser(Request $request){
 
 
+        $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+
+        // $out->writeln("i am here");
+
         $request->merge([
             'user_name' => $request->get('name') . str_pad(mt_rand(1,99999999),8,'0',STR_PAD_LEFT),
         ]);
@@ -30,8 +34,8 @@ class AuthController extends Controller
             'email' => 'email|required|unique:users',
             'password' => 'required|confirmed',
             'role' => 'required|in:artist,manager,customer',
-            'phone_number' => ['required','regex:/^(\+251|251|0)?9\d{8}$/'],
-            'profile_picture' => 'optional|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'phone_number' => ['optional','regex:/^(\+251|251|0)?9\d{8}$/'],
+            'profile_picture' => 'required',
             "user_name" => "required|unique:users"
          ]);
          
@@ -47,6 +51,7 @@ class AuthController extends Controller
         $validatedData['password'] = Hash::make($validatedData['password']);
 
         $user = User::create($validatedData);
+
 
         event(new Registered($user));
       
@@ -80,11 +85,11 @@ class AuthController extends Controller
                 return response()->json(['user' => $user, 'access_token' => $accessToken]);
             }
             else{
-                return response()->json(['message' => 'Email not verified']);
+                return response()->json(['error' => 'Email not verified'],401);
             }
         }
 
-        return response()->json(['message' => 'Invalid Credentials']);
+        return response()->json(['error' => 'Invalid Credentials'],401);
  
 
     }
