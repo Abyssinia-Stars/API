@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
-use Illuminate\Contracts\Auth\MustVerifyEmail; 
 use App\Notifications\CustomVerifyEmail;
 use App\Notifications\CustomResetPassword;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -20,7 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var array<int, string>
      */
-    
+
     protected $table = 'users';
 
     protected $fillable = [
@@ -30,8 +30,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'phone_number',
         'profile_picture',
-         'user_name'
-     
+        'user_name'
+
     ];
 
     /**
@@ -55,11 +55,12 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_verified' => 'boolean'
     ];
 
     public function sendEmailVerificationNotification()
     {
-  
+
         $this->notify(new CustomVerifyEmail());
     }
 
@@ -67,9 +68,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token)
     {
         $url = 'http://localhost:5173/reset-password?token='.$token;
-    
+
         // You can pass additional data to your notification if needed
         $this->notify(new CustomResetPassword($url));
     }
-    
+
 }

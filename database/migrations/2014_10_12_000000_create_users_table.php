@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('phone_number')->unique()->nullable();
             $table->text('profile_picture')->nullable();
             $table->enum('role', ['artist', 'manager','customer','admin']);
+            $table->string('id_image')->nullable();
+            $table->boolean('is_verified')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
