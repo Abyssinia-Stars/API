@@ -80,6 +80,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($loginData)) {
             $user = Auth::user();
+            $profile = null;
 
             if ($user->role === "artist") {
                 $profile = ArtistProfile::where("user_id", $user->id)->first();
@@ -95,6 +96,7 @@ class AuthController extends Controller
 
         return response()->json(['error' => 'Invalid Credentials'], 401);
     }
+
     public function logout(Request $request)
     {
 
