@@ -30,7 +30,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::apiResource('/artist-profile', ArtistProfileController::class);
-    Route::post('/upload-id',  [AuthController::class, 'uploadIdImage']);
+    Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
 });
 
 Route::controller(OtpVerifyController::class)->group(function () {
@@ -40,8 +40,10 @@ Route::controller(OtpVerifyController::class)->group(function () {
 
 Route::controller(AuthController::class)->group(function () {
     Route::middleware("admin")->group(function () {
-        Route::get("/admin/users", [AdminController::class, 'getUsers']);
+        Route::post("/admin/users", [AdminController::class, 'getUsers']);
         Route::post("/admin/users/{user}/verify", [AdminController::class, 'verifyUser']);
+        Route::post("/admin/users/{user}/toggle-is-active", [AdminController::class, 'toggleIsActive']);
+        Route::post("/admin/users/{user}/set-verification-status", [AdminController::class, 'setVerificationStatus']);
     });
 
     Route::post('/register', 'registerUser')->name('auth.register');
@@ -60,6 +62,6 @@ Route::controller(ResetPasswordController::class)->group(function () {
     Route::post('/reset-password', 'resetPassword')->name('password.update');
 });
 
-Route::post('/upload-image',  [UserProfileController::class, 'store']);
+Route::post('/upload-image', [UserProfileController::class, 'store']);
 
 Route::post('/google-callback', [GoogleLoginController::class, 'handleGoogleCallback'])->name('google.callback');

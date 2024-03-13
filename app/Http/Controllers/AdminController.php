@@ -20,9 +20,11 @@ class AdminController extends Controller
 
         $usersQuery = User::query();
 
-        if (!is_null($verified)) {
-            $usersQuery->where("is_verified", $query['verified']);
-        }
+        
+            $usersQuery->where("role", "artist")->orWhere("role", "customer")->orWhere("role", "manager");
+        
+
+        
 
         // Implement pagination if limit is provided, else return all
         if (isset($query['limit'])) {
@@ -39,5 +41,23 @@ class AdminController extends Controller
         $user->is_verified = true;
         $user->save();
         return response()->json($user);
+    }
+
+    public function toggleIsActive(User $user)
+    {
+        $user->is_active = !$user->is_active;
+        $user->save();
+        return response()->json(['message' => 'User is_active status updated successfully']);
+    }
+
+    public function setVerificationStatus(User $user, Request $request)
+    {
+        $request->validate([
+            "is_verified" => "required|in:pending,unverified,verified"
+        ]);
+
+        $user->is_verified = $request->is_verified;
+        $user->save();
+        return response()->json(['message' => 'User verification status updated successfully']);
     }
 }

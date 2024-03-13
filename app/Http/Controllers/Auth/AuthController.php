@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use \Illuminate\Http;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Storage;
@@ -80,6 +81,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($loginData)) {
             $user = Auth::user();
+            $profile = null;
 
             if ($user->role === "artist") {
                 $profile = ArtistProfile::where("user_id", $user->id)->first();
@@ -95,6 +97,7 @@ class AuthController extends Controller
 
         return response()->json(['error' => 'Invalid Credentials'], 401);
     }
+
     public function logout(Request $request)
     {
 
@@ -113,11 +116,16 @@ class AuthController extends Controller
             return response()->json(['error' => $validation->errors()], 400);
         }
 
+        $user = Auth::user();
+        if ($user->is_verified !== 'unverified') {
+            return response()->json(['error' => 'Verification is pending or already verfied'], 400);
+        }
+
         $idImagePath = Storage::url($request->file('id_image')->store('public/id_images'));
 
-        $user = Auth::user();
         $user->id_image = $idImagePath;
+        $user->is_verified = 'pending';
         $user->save();
-        return response()->json(['message' => 'ID image uploaded successfully']);
+        return response()->json(['message' => 'ID image uploaded successfully', 'user' => $user]);
     }
 }
