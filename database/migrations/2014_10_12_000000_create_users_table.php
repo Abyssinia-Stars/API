@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -21,7 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone_number')->unique()->nullable();
             $table->text('profile_picture')->nullable();
-            $table->enum('role', ['artist', 'manager','customer','admin']);
+            $table->enum('role', ['artist', 'manager', 'customer', 'admin']);
             $table->string('id_image')->nullable();
             $table->boolean('is_verified')->default(false);
             $table->rememberToken();
