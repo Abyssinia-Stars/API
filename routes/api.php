@@ -40,10 +40,11 @@ Route::controller(OtpVerifyController::class)->group(function () {
 
 Route::controller(AuthController::class)->group(function () {
     Route::middleware("admin")->group(function () {
-        Route::post("/admin/users", [AdminController::class, 'getUsers']);
+        Route::get("/admin/users", [AdminController::class, 'getUsers']);
         Route::post("/admin/users/{user}/verify", [AdminController::class, 'verifyUser']);
         Route::post("/admin/users/{user}/toggle-is-active", [AdminController::class, 'toggleIsActive']);
         Route::post("/admin/users/{user}/set-verification-status", [AdminController::class, 'setVerificationStatus']);
+        Route::post("/admin/users/{user}/get", [AdminController::class, 'getUser']);
     });
 
     Route::post('/register', 'registerUser')->name('auth.register');
