@@ -1,16 +1,19 @@
 <?php
 
-use App\Http\Controllers\AdminController;
+use App\Models\Offer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\JobController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\OfferController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ArtistProfileController;
-use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\OtpVerifyController;
+use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\FileUpload\UserProfileController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +27,8 @@ use App\Http\Controllers\FileUpload\UserProfileController;
 */
 
 
+
+
 Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
         return response()->json(['user' => "Alemu SISAY IT WORKS"], 200);
@@ -31,6 +36,21 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('/artist-profile', ArtistProfileController::class);
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
+
+    Route::get('/client/jobss/{id}', [JobController::class, 'showJobsByClient']);
+
+
+    Route::apiResource('/client/jobs', JobController::class);
+
+
+
+    Route::apiResource('/job/offer', OfferController::class);
+    // Route::apiResource('/job/offer/{id}', OfferController::class);
+
+
+
+    Route::apiResource('/events', EventController::class);
+    Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
 });
 
 Route::controller(OtpVerifyController::class)->group(function () {

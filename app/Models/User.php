@@ -73,4 +73,23 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new CustomResetPassword($url));
     }
 
+
+    public function Jobs()
+    {
+        return $this->hasMany('App\Models\MezmurModel\Job'::class);
+    }
+
+
+    public function Offers()
+    {
+        return $this->hasMany('App\Models\MezmurModel\Offer'::class);
+    }
+
+    public function Events()
+    {
+        return $this->hasMany('App\Models\MezmurModel\Event'::class);
+    }
+
+
+
 }
