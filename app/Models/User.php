@@ -10,10 +10,12 @@ use Laravel\Passport\HasApiTokens;
 use App\Notifications\CustomVerifyEmail;
 use App\Notifications\CustomResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasPushSubscriptions;
+
 
     /**
      * The attributes that are mass assignable.
@@ -45,12 +47,12 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
- * Send the password reset notification.
- *
- * @param  string  $token
- * @param  string  $id
- * @return void
- */
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @param  string  $id
+     * @return void
+     */
 
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -67,7 +69,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendPasswordResetNotification($token)
     {
-        $url = 'http://localhost:5173/reset-password?token='.$token;
+        $url = 'http://localhost:5173/reset-password?token=' . $token;
 
         // You can pass additional data to your notification if needed
         $this->notify(new CustomResetPassword($url));

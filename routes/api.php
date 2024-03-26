@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
@@ -31,6 +32,12 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('/artist-profile', ArtistProfileController::class);
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
+
+    Route::prefix("/notifications")->group(function () {
+        Route::post('/subscribe', [NotificationController::class, 'subscribe']);
+        Route::post('/unsubscribe', [NotificationController::class, 'unsubscribe']);
+        Route::post('/send', [NotificationController::class, 'send']);
+    });
 });
 
 Route::controller(OtpVerifyController::class)->group(function () {
