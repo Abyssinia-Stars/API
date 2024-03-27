@@ -51,6 +51,8 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
+
+
 });
 
 Route::controller(OtpVerifyController::class)->group(function () {

@@ -22,6 +22,6 @@ class Event extends Model
 
     public function Users()
     {
-        return $this->belongsTo('App\Models\MezmurModel\User');
+        return $this->belongsTo('App\Models\User');
     }
 }

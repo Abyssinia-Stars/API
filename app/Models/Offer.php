@@ -16,12 +16,12 @@ class Offer extends Model
 
     public function Jobs()
     {
-        return $this->belongsTo('App\Models\MezmurModel\Job');
+        return $this->belongsTo('App\Models\Job');
     }
 
     public function Users()
     {
-        return $this->belongsTo('App\Models\MezmurModel\User');
+        return $this->belongsTo('App\Models\User');
     }
 
 

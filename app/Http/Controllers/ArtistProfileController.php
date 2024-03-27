@@ -20,6 +20,39 @@ class ArtistProfileController extends Controller
      */
     public function index()
     {
+
+
+        $songs = ArtistProfile::with('users:id,name,profile_picture,is_active')
+        ->get(['']); // Select columns from the songs table
+
+
+
+
+
+
+        $songsData = $songs->map(function ($song) {
+
+            return [
+                'id' => $song->id,
+                'artist_id' => $song->artist_id,
+                'artist_name' => $song->artist->name,
+                'title' => $song->title,
+                'lyrics' => $song->lyrics,
+                'scale_id' => $song->scale_id,
+                'link' => $song->link,
+
+                'scale_name' => $song->scale->name,
+                'language_name' => $song->language->name
+                // Safely access the album title
+            ];
+        });
+
+        // Return the response as JSON
+        return response()->json($songsData);
+
+
+
+        
     }
 
     /**

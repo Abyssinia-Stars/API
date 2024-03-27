@@ -27,4 +27,16 @@ class ArtistProfile extends Model
 
 
 
+
+
+   public function Users()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+    
+
+
+
+
+
 }

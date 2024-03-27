@@ -33,7 +33,8 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'profile_picture' => fake()->imageUrl(),
             'role' => fake()->randomElement(['artist', 'manager', 'customer']),
-            'is_verified' => fake()->boolean(),
+            'is_verified' => fake()->randomElement(['verified', 'unverified']),
+            'is_active'=>fake()->boolean()
         ];
     }
 
