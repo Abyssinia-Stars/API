@@ -18,41 +18,34 @@ class ArtistProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $validation = Validator::make($request->all(), [
+            'q' => 'string',
+            'catagory' => 'string[]',
+            'limit' => 'integer|min:1|max:100',
+            'page' => 'integer|min:1',
+        ]);
 
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()], 400);
+        }
 
-        $songs = ArtistProfile::with('users:id,name,profile_picture,is_active')
-        ->get(['']); // Select columns from the songs table
+        $limit = $request->input('limit', 10);
+        $page = $request->input('page', 1);
+        $catagory = $request->input('catagory');
+        $q = $request->input('q', '');
 
-
-
-
-
-
-        $songsData = $songs->map(function ($song) {
-
-            return [
-                'id' => $song->id,
-                'artist_id' => $song->artist_id,
-                'artist_name' => $song->artist->name,
-                'title' => $song->title,
-                'lyrics' => $song->lyrics,
-                'scale_id' => $song->scale_id,
-                'link' => $song->link,
-
-                'scale_name' => $song->scale->name,
-                'language_name' => $song->language->name
-                // Safely access the album title
-            ];
-        });
-
-        // Return the response as JSON
-        return response()->json($songsData);
-
-
-
-        
+        $artists = ArtistProfile::with('users:role')
+            // ->where('role', '=', 'artist')
+            // ->where('is_verified', 'verified')
+            // ->where('is_active', true)
+            // // ->whereIn('catagory', $catagory)
+            // ->where('name', 'like', "%$q%")
+            // ->get(['id', 'bio']);
+            ->get();
+        // ->paginate($limit, ['*'], 'page', $page);
+        return $artists;
     }
 
     /**

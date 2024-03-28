@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ArtistProfile extends Model
 {
@@ -15,9 +16,8 @@ class ArtistProfile extends Model
         'category',
         'youtube_links',
         'attachments',
+        'role'
     ];
-
-
 
     protected $casts = [
         'category' => 'array',
@@ -25,18 +25,8 @@ class ArtistProfile extends Model
         'attachments' => 'array',
     ];
 
-
-
-
-
-   public function Users()
+    public function users(): BelongsTo
     {
-        return $this->belongsTo('App\Models\User');
+        return $this->belongsTo(User::class);
     }
-    
-
-
-
-
-
 }

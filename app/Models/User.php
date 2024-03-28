@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -30,8 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'phone_number',
         'profile_picture',
-        'user_name'
-
+        'user_name',
     ];
 
     /**
@@ -45,12 +46,12 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
- * Send the password reset notification.
- *
- * @param  string  $token
- * @param  string  $id
- * @return void
- */
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @param  string  $id
+     * @return void
+     */
 
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -67,7 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendPasswordResetNotification($token)
     {
-        $url = 'http://localhost:5173/reset-password?token='.$token;
+        $url = 'http://localhost:5173/reset-password?token=' . $token;
 
         // You can pass additional data to your notification if needed
         $this->notify(new CustomResetPassword($url));
@@ -91,11 +92,8 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
 
-    public function ArtistProfile()
+    public function profile(): HasMany
     {
-        return $this->hasMany('App\Models\User'::class);
+        return $this->hasMany(ArtistProfile::class);
     }
-
-
-
 }

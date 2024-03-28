@@ -30,30 +30,22 @@ use App\Http\Controllers\FileUpload\UserProfileController;
 
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return response()->json(['user' => "Alemu SISAY IT WORKS"], 200);
+    Route::get('/user/me', function () {
+        return Auth::user();
     });
 
-    Route::apiResource('/artist-profile', ArtistProfileController::class);
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
-
-    Route::get('/client/jobss/{id}', [JobController::class, 'showJobsByClient']);
-
-
-    Route::apiResource('/client/jobs', JobController::class);
-
-
-
-    Route::apiResource('/job/offer', OfferController::class);
-    // Route::apiResource('/job/offer/{id}', OfferController::class);
-
-
 
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
-
-
 });
+
+// Route::prefix('client')->middleware('client')->group(function () {
+Route::apiResource('/artists', ArtistProfileController::class);
+Route::get('/jobs', [JobController::class, 'index']);
+Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
+Route::apiResource('/job/offer', OfferController::class);
+// });
 
 Route::controller(OtpVerifyController::class)->group(function () {
     Route::post("/verify-otp", [OtpVerifyController::class, 'verify'])->name('otp.verify');
