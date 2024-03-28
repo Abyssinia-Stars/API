@@ -18,8 +18,46 @@ class ArtistProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $validation = Validator::make($request->all(), [
+            'q' => 'string|nullable',
+            'catagory' => 'array', // Changed 'string[]' to 'array'
+            'limit' => 'integer|min:1|max:100',
+            'page' => 'integer|min:1',
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()], 400);
+        }
+
+        $limit = $request->input('limit', 10);
+        $page = $request->input('page', 1);
+        $catagory = $request->input('catagory');
+        $q = $request->input('q', '');
+
+        $query = ArtistProfile::join('users', 'artist_profiles.user_id', '=', 'users.id')
+            ->where('users.role', 'artist')
+            ->where('users.is_verified', 'verified')
+            ->where('users.is_active', true)
+            ->where('users.name', 'like', "%$q%");
+
+        if ($catagory) {
+            $query->whereJsonContains('category', $catagory);
+        }
+
+        // Specify the columns you want to retrieve from both tables
+        $artists = $query->select(
+            'artist_profiles.id',
+            'artist_profiles.user_id',
+            'artist_profiles.bio',
+            'artist_profiles.category',
+            'users.name as name',
+            'users.email',
+            'users.profile_picture'
+        )->paginate($limit, ['*'], 'page', $page);
+
+        return $artists;
     }
 
     /**
@@ -53,7 +91,6 @@ class ArtistProfileController extends Controller
 
             return response()->json(['error' => $validation->errors()], 400);
         }
-
 
         $out->writeln("i am kkkk" . json_encode($request->all()));
 
@@ -109,9 +146,32 @@ class ArtistProfileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ArtistProfile $artistProfile)
+    public function show($id)
     {
-        //
+        $artist = ArtistProfile::where('id', $id)
+            ->with('user')
+            ->whereHas('user', function ($query) {
+                $query->where('role', 'artist')
+                    ->where('is_verified', 'verified')
+                    ->where('is_active', true);
+            })
+            ->first();
+
+        if (!$artist) {
+            return response()->json(['error' => 'Artist not found'], 404);
+        }
+
+        return response()->json([
+            'id' => $artist->id,
+            'user_id' => $artist->user_id,
+            'bio' => $artist->bio,
+            'user' => [
+                'id' => $artist->user->id,
+                'name' => $artist->user->name,
+                'email' => $artist->user->email,
+                // Add other user columns as needed
+            ]
+        ]);
     }
     /**
      * Update the specified resource in storage.
