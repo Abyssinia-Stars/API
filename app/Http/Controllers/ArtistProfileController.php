@@ -37,16 +37,16 @@ class ArtistProfileController extends Controller
         $q = $request->input('q', '');
 
         $query = ArtistProfile::with('user')
-        ->whereHas('user', function ($query) use ($q) {
-            $query->where('name', 'like', "%$q%")
-                ->where('role', 'artist')
-                ->where('is_verified', 'verified')
-                ->where('is_active', true);
-        });
+            ->whereHas('user', function ($query) use ($q) {
+                $query->where('name', 'like', "%$q%")
+                    ->where('role', 'artist')
+                    ->where('is_verified', 'verified')
+                    ->where('is_active', true);
+            });
 
 
         if ($catagory) {
-            $query->json('category', $catagory);
+            $query->whereJsonContains('category', $catagory);
         }
 
         $artists = $query->paginate($limit, ['*'], 'page', $page);
