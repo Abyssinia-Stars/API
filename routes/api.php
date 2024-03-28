@@ -40,12 +40,16 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
 });
 
-// Route::prefix('client')->middleware('client')->group(function () {
-Route::apiResource('/artists', ArtistProfileController::class);
-Route::get('/jobs', [JobController::class, 'index']);
-Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
-Route::apiResource('/job/offer', OfferController::class);
-// });
+Route::middleware('artist')->group(function () {
+    Route::apiResource('/artists', ArtistProfileController::class)->only('store');
+});
+
+Route::prefix('client')->middleware('client')->group(function () {
+    Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');
+    Route::get('/jobs', [JobController::class, 'index']);
+    Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
+    Route::apiResource('/job/offer', OfferController::class);
+});
 
 Route::controller(OtpVerifyController::class)->group(function () {
     Route::post("/verify-otp", [OtpVerifyController::class, 'verify'])->name('otp.verify');
