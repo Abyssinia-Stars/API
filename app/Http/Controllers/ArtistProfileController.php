@@ -22,7 +22,7 @@ class ArtistProfileController extends Controller
     {
         $validation = Validator::make($request->all(), [
             'q' => 'string',
-            'catagory' => 'string[]',
+            'catagory' => 'array', // Changed 'string[]' to 'array'
             'limit' => 'integer|min:1|max:100',
             'page' => 'integer|min:1',
         ]);
@@ -36,15 +36,21 @@ class ArtistProfileController extends Controller
         $catagory = $request->input('catagory');
         $q = $request->input('q', '');
 
-        $artists = ArtistProfile::with('users:role')
-            // ->where('role', '=', 'artist')
-            // ->where('is_verified', 'verified')
-            // ->where('is_active', true)
-            // // ->whereIn('catagory', $catagory)
-            // ->where('name', 'like', "%$q%")
-            // ->get(['id', 'bio']);
-            ->get();
-        // ->paginate($limit, ['*'], 'page', $page);
+        $query = ArtistProfile::with('user')
+        ->whereHas('user', function ($query) use ($q) {
+            $query->where('name', 'like', "%$q%")
+                ->where('role', 'artist')
+                ->where('is_verified', 'verified')
+                ->where('is_active', true);
+        });
+
+
+        if ($catagory) {
+            $query->json('category', $catagory);
+        }
+
+        $artists = $query->paginate($limit, ['*'], 'page', $page);
+
         return $artists;
     }
 

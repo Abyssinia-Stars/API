@@ -92,8 +92,8 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
 
-    public function profile(): HasMany
+    public function artistProfile()
     {
-        return $this->hasMany(ArtistProfile::class);
+        return $this->hasOne(ArtistProfile::class);
     }
 }
