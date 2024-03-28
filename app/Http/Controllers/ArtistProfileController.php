@@ -82,22 +82,13 @@ class ArtistProfileController extends Controller
             'bio' => 'string|max:255',
             'category' => 'required|array',
             'youtube_links' => 'required|array',
-            'attachments' => 'required|array|min:1|max:5',
+            'attachments' => 'array|min:1|max:5',
             'attachments.*' => 'file|max:20000', // 200 MB
         ]);
 
         if ($validation->fails()) {
-
-
             return response()->json(['error' => $validation->errors()], 400);
         }
-
-        $out->writeln("i am kkkk" . json_encode($request->all()));
-
-
-
-
-
         $validatedData = $request->all();
 
         // Upload the cover picture
@@ -111,29 +102,24 @@ class ArtistProfileController extends Controller
                 $attachmentPaths[] = $attachmentPath;
             }
         }
-
         try {
-            $user = Auth::user();
-
+            $user = Auth::user(); 
             // Create the ArtistProfile with the validated data
             $artistProfile = ArtistProfile::create(
                 [
                     'user_id' => $user->id,
-
                     'bio' => $validatedData['bio'],
                     'category' => $validatedData['category'],
                     'youtube_links' => $validatedData['youtube_links'],
                     'attachments' => $attachmentPaths
                 ]
             );
-
             // Update the user's profile picture if provided in the request
             if (isset($validatedData['profile_picture'])) {
                 $user->profile_picture = $profilePicturePath;
                 $user->save();
                 // return response()->json(['message' => 'Profile picture updated successfully']);
             }
-
             // Optionally, associate the user with the artist profile here
             // For example, $artistProfile->user_id = $user->id;
             // $artistProfile->save();
@@ -142,7 +128,6 @@ class ArtistProfileController extends Controller
             return response()->json(['message' => 'Error creating artist profile: ' . $e->getMessage()], 500);
         }
     }
-
     /**
      * Display the specified resource.
      */
