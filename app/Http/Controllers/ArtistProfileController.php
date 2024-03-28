@@ -82,7 +82,7 @@ class ArtistProfileController extends Controller
             'bio' => 'string|max:255',
             'category' => 'required|array',
             'youtube_links' => 'required|array',
-            'attachments' => 'required|array|min:1|max:5',
+            'attachments' => 'array|min:1|max:5',
             'attachments.*' => 'file|max:20000', // 200 MB
         ]);
 
@@ -114,7 +114,6 @@ class ArtistProfileController extends Controller
 
         try {
             $user = Auth::user();
-
             // Create the ArtistProfile with the validated data
             $artistProfile = ArtistProfile::create(
                 [
