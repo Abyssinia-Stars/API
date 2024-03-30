@@ -79,14 +79,9 @@ class EventController extends Controller
     public function destroy($id)
     {
 
-
-        $artist_id = Auth::user()->id;
-
-
-        $event = Event::where('artist_id', $artist_id)->where('id', $id)->first();
-
-        $event->delete();
-        return response()->json(['Events' => $event],204);
+        $event = Event::where('id', $id)->first();
+        $is_deleted = $event->delete();
+        return response()->json(["Is deleted" => $is_deleted], 200);
     }
 
 

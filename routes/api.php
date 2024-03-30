@@ -33,16 +33,14 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/user/me', function () {
         return Auth::user();
     });
-
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
-
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
+    Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
+
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
 });
 
-Route::middleware('artist')->group(function () {
-});
 
 Route::prefix('client')->middleware('client')->group(function () {
     Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');

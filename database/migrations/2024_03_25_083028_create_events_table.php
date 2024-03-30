@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('artist_id');
             $table->foreign('artist_id')->references('id')->on('users')->onDelete('cascade');
-            $table->dateTime('start');
-            $table->dateTime('end');
+            $table->string('start');
+            $table->string('end');
             $table->boolean('is_availabile')->default(true);
             $table->timestamps();
         });
