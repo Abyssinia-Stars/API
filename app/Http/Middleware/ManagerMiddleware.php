@@ -4,10 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
-class ArtistMiddleware
+class ManagerMiddleware
 {
     /**
      * Handle an incoming request.
@@ -16,8 +16,10 @@ class ArtistMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->role !== 'artist') {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        if(Auth::user()->role != 'manager'){
+            return response()->json([
+                'message' => 'User is not a manager'
+            ], 400);
         }
         return $next($request);
     }

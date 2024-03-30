@@ -16,8 +16,8 @@ class ClientMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::guard('api')->check() || !Auth::guard('api')->user()->role === 'customer') {
-            return response()->json(['message' => 'Unauthorized.', 'check1' => Auth::guard('api')->check()], 401);
+        if (AUth::user()->role !== 'customer') {
+            return response()->json(['message' => 'User is not Logged in as Customer'], 401);
         }
 
         return $next($request);

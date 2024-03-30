@@ -14,6 +14,8 @@ use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\FileUpload\UserProfileController;
+use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,15 +41,46 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
 
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
+
+ 
+
+    Route::prefix("notification/manager")->middleware('manager')->group(function () {
+        Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
+        Route::post('/response/{notificationId}', [ManagerController::class, 'handleResponse']);
+        Route::get('/', [ManagerController::class, 'getNotifications']);
+    });
+
+    Route::prefix("notification/artist")->middleware('artist')->group(function(){
+
+        Route::post('/send-request/{userId}', [ArtistProfileController::class, 'sendRequest']);
+        Route::post('/response/{notificationId}', [ArtistProfileController::class, 'handleResponse']);
+        Route::get('/', [ArtistProfileController::class, 'getNotifications']);
+    });
+
+    
+    
+    Route::prefix('customer')->middleware('customer')->group(function () {
+        Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');
+        Route::get('/jobs', [JobController::class, 'index']);
+        Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
+        Route::apiResource('/job/offer', OfferController::class);
+        Route::post("favorites/add/{userId}", [CustomerController::class, 'addArtistToFavorites']);
+        Route::get("favorites", [CustomerController::class, 'getFavorites']);
+        Route::delete("favorites/remove/{userId}", [CustomerController::class, 'removeArtistFromFavorites']);
+        Route::post("reviews/add/{userId}", [CustomerController::class, 'addReview']);
+        Route::delete("reviews/remove/{userId}", [CustomerController::class, 'removeReview']);
+        Route::get("reviews", [CustomerController::class, 'getReviews']);
+    });
+
 });
 
+Route::get('/get-random-artists', [CustomerController::class, 'getRandomAritsts']);
+Route::get('/get-random-categories', [CustomerController::class, 'getRandomCategories']);
+Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);   
+Route::get("reviews", [ArtistProfileController::class, 'getReviews']);
+Route::get("/search-artists", [CustomerController::class, 'getArtistByParams']);
 
-Route::prefix('client')->middleware('client')->group(function () {
-    Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');
-    Route::get('/jobs', [JobController::class, 'index']);
-    Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
-    Route::apiResource('/job/offer', OfferController::class);
-});
+
 
 Route::controller(OtpVerifyController::class)->group(function () {
     Route::post("/verify-otp", [OtpVerifyController::class, 'verify'])->name('otp.verify');
