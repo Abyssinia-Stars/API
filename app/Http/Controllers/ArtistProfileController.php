@@ -158,6 +158,25 @@ class ArtistProfileController extends Controller
             ]
         ]);
     }
+
+    public function getArtistProfile($id){
+        $artist = ArtistProfile::where('user_id', $id)->first();
+
+        if (!$artist) {
+            return response()->json(['error' => 'Artist not found'], 404);
+        }
+
+        return response()->json([
+            'id' => $artist->id,
+            'user_id' => $artist->user_id,
+            'bio' => $artist->bio,
+            'name' => $artist->user->name,
+            'email' => $artist->user->email,
+            'category' => $artist->category,
+                // Add other user columns as needed
+        ]);
+
+    }
     /**
      * Update the specified resource in storage.
      */

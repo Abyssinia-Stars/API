@@ -38,10 +38,10 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
+    Route::apiResource('/artists', ArtistProfileController::class)->only('store');
 });
 
 Route::middleware('artist')->group(function () {
-    Route::apiResource('/artists', ArtistProfileController::class)->only('store');
 });
 
 Route::prefix('client')->middleware('client')->group(function () {
