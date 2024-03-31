@@ -11,8 +11,8 @@ class AdminController extends Controller
 {
     public function getUsers(Request $request)
     {
-    $out = new \Symfony\Component\Console\Output\ConsoleOutput();
- 
+        $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+
 
         $validator = Validator::make($request->all(), [
             'per_page' => 'required|integer|min:1|max:100', // Adjust max limit as needed
@@ -24,45 +24,45 @@ class AdminController extends Controller
         ]);
 
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
                 'message' => 'Bad Request',
-                'errors' => $validate->errors()
+                'errors' => $validator->errors()
             ], 400);
         }
 
-    
-        
+
+
         $out->write($request->all());
 
-        $perPage = $request->input('per_page',10);
-        $currentPage = $request->input('current_page',1);
+        $perPage = $request->input('per_page', 10);
+        $currentPage = $request->input('current_page', 1);
         $isVerified = $request->input('is_verified', 'all');
-        $role = $request->input('role','all');
-        $q = $request->input('q','');
+        $role = $request->input('role', 'all');
+        $q = $request->input('q', '');
         $sortParam = $request->input('sort');
 
-   
-        if($role){
-        
-            if($role == 'all'){
-                $users = User::where('role', '!=','admin');
-            }else{
+
+        if ($role) {
+
+            if ($role == 'all') {
+                $users = User::where('role', '!=', 'admin');
+            } else {
                 $users = User::where('role', $role);
             }
-}
-        if($isVerified != 'all'){
+        }
+        if ($isVerified != 'all') {
             $users = $users->where('is_verified', $isVerified);
         }
 
-        if($q){
+        if ($q) {
             $users = $users->where(function ($query) use ($q) {
                 $query->where('name', 'like', "%$q%")
                     ->orWhere('email', 'like', "%$q%");
             });
         }
 
-        if($sortParam){
+        if ($sortParam) {
             $sort = explode(',', $sortParam);
             $users = $users->orderBy($sort[0], $sort[1] ?? 'asc');
         }
@@ -72,7 +72,7 @@ class AdminController extends Controller
         $users = $users->orderBy('id') // Default sorting by name (optional)
             ->paginate($perPage, ['*'], 'page', $currentPage); // Use custom query params
 
-            // $out->writeln($isVerified);
+        // $out->writeln($isVerified);
         return response()->json($users);
 
     }
@@ -107,7 +107,7 @@ class AdminController extends Controller
     public function setVerificationStatus(User $user, Request $request)
     {
 
-              $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $out = new \Symfony\Component\Console\Output\ConsoleOutput();
         $out->writeln($request->all());
 
         $request->validate([
