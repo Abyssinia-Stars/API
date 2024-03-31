@@ -1,16 +1,21 @@
 <?php
 
-use App\Http\Controllers\AdminController;
+use App\Models\Offer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\JobController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\OfferController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ArtistProfileController;
-use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\OtpVerifyController;
+use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\FileUpload\UserProfileController;
-
+use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,14 +29,58 @@ use App\Http\Controllers\FileUpload\UserProfileController;
 */
 
 
+
+
 Route::middleware('auth:api')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return response()->json(['user' => "Alemu SISAY IT WORKS"], 200);
+    Route::get('/user/me', function () {
+        return Auth::user();
+    });
+    Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
+    Route::apiResource('/events', EventController::class);
+    Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
+    Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
+
+    Route::apiResource('/artists', ArtistProfileController::class)->only('store');
+
+ 
+
+    Route::prefix("notification/manager")->middleware('manager')->group(function () {
+        Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
+        Route::post('/response/{notificationId}', [ManagerController::class, 'handleResponse']);
+        Route::get('/', [ManagerController::class, 'getNotifications']);
     });
 
-    Route::apiResource('/artist-profile', ArtistProfileController::class);
-    Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
+    Route::prefix("notification/artist")->middleware('artist')->group(function(){
+
+        Route::post('/send-request/{userId}', [ArtistProfileController::class, 'sendRequest']);
+        Route::post('/response/{notificationId}', [ArtistProfileController::class, 'handleResponse']);
+        Route::get('/', [ArtistProfileController::class, 'getNotifications']);
+    });
+
+    
+    
+    Route::prefix('customer')->middleware('customer')->group(function () {
+        Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');
+        Route::get('/jobs', [JobController::class, 'index']);
+        Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
+        Route::apiResource('/job/offer', OfferController::class);
+        Route::post("favorites/add/{userId}", [CustomerController::class, 'addArtistToFavorites']);
+        Route::get("favorites", [CustomerController::class, 'getFavorites']);
+        Route::delete("favorites/remove/{userId}", [CustomerController::class, 'removeArtistFromFavorites']);
+        Route::post("reviews/add/{userId}", [CustomerController::class, 'addReview']);
+        Route::delete("reviews/remove/{userId}", [CustomerController::class, 'removeReview']);
+        Route::get("reviews", [CustomerController::class, 'getReviews']);
+    });
+
 });
+
+Route::get('/get-random-artists', [CustomerController::class, 'getRandomAritsts']);
+Route::get('/get-random-categories', [CustomerController::class, 'getRandomCategories']);
+Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);   
+Route::get("reviews", [ArtistProfileController::class, 'getReviews']);
+Route::get("/search-artists", [CustomerController::class, 'getArtistByParams']);
+
+
 
 Route::controller(OtpVerifyController::class)->group(function () {
     Route::post("/verify-otp", [OtpVerifyController::class, 'verify'])->name('otp.verify');
@@ -39,12 +88,12 @@ Route::controller(OtpVerifyController::class)->group(function () {
 });
 
 Route::controller(AuthController::class)->group(function () {
-    Route::middleware("admin")->group(function () {
-        Route::get("/admin/users", [AdminController::class, 'getUsers']);
-        Route::post("/admin/users/{user}/verify", [AdminController::class, 'verifyUser']);
-        Route::post("/admin/users/{user}/toggle-is-active", [AdminController::class, 'toggleIsActive']);
-        Route::post("/admin/users/{user}/set-verification-status", [AdminController::class, 'setVerificationStatus']);
-        Route::post("/admin/users/{user}/get", [AdminController::class, 'getUser']);
+    Route::prefix("/admin/users")->middleware("admin")->group(function () {
+        Route::get("/", [AdminController::class, 'getUsers']);
+        Route::post("/{user}/verify", [AdminController::class, 'verifyUser']);
+        Route::patch("{user}/toggle-is-active", [AdminController::class, 'toggleIsActive']);
+        Route::post("/{user}/set-verification-status", [AdminController::class, 'setVerificationStatus']);
+        Route::post("/{user}/get", [AdminController::class, 'getUser']);
     });
 
     Route::post('/register', 'registerUser')->name('auth.register');

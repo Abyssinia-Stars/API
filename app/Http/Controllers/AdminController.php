@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\ArtistProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -11,94 +12,64 @@ class AdminController extends Controller
     public function getUsers(Request $request)
     {
     $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-    // $out->writeln($request->all());
+ 
 
         $validator = Validator::make($request->all(), [
             'per_page' => 'required|integer|min:1|max:100', // Adjust max limit as needed
             'current_page' => 'required|integer|min:1',
             'role' => 'in:artist,customer,manager,all', // Allowed roles (optional)
             'is_verified' => 'in:verified,unverified,pending', // Optional, true or false
-            'search' => 'string|nullable', // Optional search term
+            'q' => 'string|nullable', // Optional search term
             'sort' => ['string', 'nullable', 'regex:/^([a-zA-Z0-9_]+)(,(asc|desc))?$/'], // Custom sort validation
         ]);
 
-        // Cast verified to boolean properly. This handles null, true, false, "true", "false", etc.
-        // $verified = filter_var($request->query('verified'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
-        // $usersQuery = User::query();
-
-        
-            // $usersQuery->where("role", "artist")->orWhere("role", "customer")->orWhere("role", "manager");
-        
-
-        
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        if($validator->fails()){
+            return response()->json([
+                'message' => 'Bad Request',
+                'errors' => $validate->errors()
+            ], 400);
         }
+
+    
+        
         $out->write($request->all());
 
-        $perPage = $request->query('per_page');
-        $currentPage = $request->query('current_page');
-        $isVerified = $request->query('is_verified');
-        $role = $request->query('role');
-        $search = $request->query('search');
-        $sortParam = $request->query('sort');
+        $perPage = $request->input('per_page',10);
+        $currentPage = $request->input('current_page',1);
+        $isVerified = $request->input('is_verified', 'all');
+        $role = $request->input('role','all');
+        $q = $request->input('q','');
+        $sortParam = $request->input('sort');
 
-        // $out->writeln($isVerified);
-
-        // Extract sort field and order (already validated)
-        $sortField = null;
-        $sortOrder = 'desc'; // Default to descending order
-
-        if ($sortParam) {
-            $sortParts = explode(',', $sortParam);
-
-            if (count($sortParts) === 1) {
-                $sortField = $sortParts[0];
-            } elseif (count($sortParts) === 2) {
-                $sortField = $sortParts[0];
-                $sortOrder = strtolower($sortParts[1]) === 'asc' ? 'asc' : 'desc';
+   
+        if($role){
+        
+            if($role == 'all'){
+                $users = User::where('role', '!=','admin');
+            }else{
+                $users = User::where('role', $role);
             }
-
-            // Validate allowed sort field
-            $allowedFields = ['name', 'email', 'role', 'is_verified'];
-            if (!in_array($sortField, $allowedFields)) {
-                // Return error for invalid sort field
-                return response()->json([
-                    'message' => 'Invalid sort field. Allowed fields: ' . implode(', ', $allowedFields)
-                ], 400);
-            }
+}
+        if($isVerified != 'all'){
+            $users = $users->where('is_verified', $isVerified);
         }
 
-        $users = User::query();
-
-        if (isset($search)) {
-            $users->where(function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+        if($q){
+            $users = $users->where(function ($query) use ($q) {
+                $query->where('name', 'like', "%$q%")
+                    ->orWhere('email', 'like', "%$q%");
             });
         }
 
-        if (isset($role)) {
-        if($role != "all")
-            $users->where('role', $role);
-        $users->where("role", "artist")->orWhere("role", "customer")->orWhere("role", "manager");
-
-        }
-
-        if (isset($request->is_verified)) {
-            $users->where('is_verified', $request->is_verified);
-        }
-
-        if ($sortField) {
-            $users->orderBy($sortField, $sortOrder);
-        } else {
-            // Default sorting by name, descending
-            $users->orderBy('name', 'desc');
+        if($sortParam){
+            $sort = explode(',', $sortParam);
+            $users = $users->orderBy($sort[0], $sort[1] ?? 'asc');
         }
 
 
-        $users = $users->orderBy('name') // Default sorting by name (optional)
+
+        $users = $users->orderBy('id') // Default sorting by name (optional)
             ->paginate($perPage, ['*'], 'page', $currentPage); // Use custom query params
 
             // $out->writeln($isVerified);
@@ -124,8 +95,13 @@ class AdminController extends Controller
     {
         // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
         // $out->writeln($user->all());
+        $profile = null;
 
-        return response()->json($user);
+        if ($user->role === "artist") {
+            $profile = ArtistProfile::where("user_id", $user->id)->first();
+        }
+
+        return response()->json(['user' => $user, 'profile' => $profile]);
     }
 
     public function setVerificationStatus(User $user, Request $request)

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\ArtistProfile;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'admin@example.com',
             ]);
         }
-        User::factory(25)->create();
+        User::factory(10)->create();
+        ArtistProfile::factory(15)->create();
     }
 }
