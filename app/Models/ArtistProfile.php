@@ -16,7 +16,8 @@ class ArtistProfile extends Model
         'category',
         'youtube_links',
         'attachments',
-        'role'
+        'role',
+        'price_rate'
     ];
 
     protected $casts = [

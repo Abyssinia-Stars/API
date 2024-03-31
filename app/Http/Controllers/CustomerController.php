@@ -89,6 +89,7 @@ public function getArtistByParams(Request $request){
     $q = $request->input('q', '');
 
 
+
     $users = User::where('role', 'artist')
     ->where('is_verified', 'verified')
     ->where('is_active', true)
@@ -101,20 +102,32 @@ public function getArtistByParams(Request $request){
 
 $artistProfiles = ArtistProfile::where(function ($query) use ($categories) {
         foreach ($categories as $category) {
+            if($category === "all"){
+                $query->orWhere('category', '!=', null);
+            }
             $query->orWhereJsonContains('category', $category);
         }
     })
     ->whereIn('user_id', $users->pluck('id')) 
     ->get();
 
+$reviewProfiles = Review::whereIn('artist_id', $artistProfiles->pluck('user_id'));
+
 $results = [];
 foreach ($users as $user) {
     $profile = $artistProfiles->firstWhere('user_id', $user->id);
+    $ratings = $reviewProfiles->firstWhere('artist_id', $user->id);
+    if(!$profile){
+        continue;
+    }
     $results[] = [
         'user' => $user,
         'profile' => $profile,
+        'rating' => $ratings
     ];
 }
+//paginate the result 
+$results = collect($results)->forPage($page, $limit)->values();
 
     return response()->json([
         'artists' => $results

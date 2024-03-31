@@ -67,8 +67,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post("favorites/add/{userId}", [CustomerController::class, 'addArtistToFavorites']);
         Route::get("favorites", [CustomerController::class, 'getFavorites']);
         Route::delete("favorites/remove/{userId}", [CustomerController::class, 'removeArtistFromFavorites']);
-        Route::post("reviews/add/{userId}", [CustomerController::class, 'addReview']);
-        Route::delete("reviews/remove/{userId}", [CustomerController::class, 'removeReview']);
+        Route::post("reviews/{userId}", [CustomerController::class, 'addReview']);
+        Route::delete("reviews/{userId}", [CustomerController::class, 'removeReview']);
         Route::get("reviews", [CustomerController::class, 'getReviews']);
     });
 
@@ -78,7 +78,7 @@ Route::get('/get-random-artists', [CustomerController::class, 'getRandomAritsts'
 Route::get('/get-random-categories', [CustomerController::class, 'getRandomCategories']);
 Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);   
 Route::get("reviews", [ArtistProfileController::class, 'getReviews']);
-Route::get("/search-artists", [CustomerController::class, 'getArtistByParams']);
+Route::get("/get-artists", [CustomerController::class, 'getArtistByParams']);
 
 
 
