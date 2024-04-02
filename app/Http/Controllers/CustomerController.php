@@ -16,15 +16,28 @@ class CustomerController extends Controller
 {
     //
     public function getRandomAritsts(){
-        $artists = User::where('role', 'artist')->inRandomOrder()->limit(5)->get();
+        $artists = User::where('role', 'artist')->inRandomOrder()->limit(6)->get();
+        $artistsWithRating = [];
+
+        foreach($artists as $artist){
+           
+            $averageRating = $this->calculateAverageRating($artist);
+        
+                $artistsWithRating[] = [
+                    'artist' => $artist,
+                    'rating' => $averageRating
+                ];
+            }
         return response()->json([
-            'artists' => $artists
+            'artists' => $artistsWithRating
         ]);
+        
     }
 
     public function getPopularArtistsByRating(){
 
         $artists = User::where('role', 'artist')->get();
+    
         $artistsWithRating = [];
         foreach($artists as $artist){
            
@@ -42,11 +55,10 @@ class CustomerController extends Controller
   
             return $b['rating'] <=> $a['rating'];
         });
-        // $maxItems = 10; // Define the maximum number of items
-// $artistsWithRating = array_slice($artistsWithRating, 0, $maxItems);
-
+ 
         
         return response()->json([
+
             'artists' => $artistsWithRating
         ]);
 
@@ -99,14 +111,17 @@ public function getArtistByParams(Request $request){
     })
     ->get();
 
+    $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+    $out->writeln($categories);
 
 $artistProfiles = ArtistProfile::where(function ($query) use ($categories) {
-        foreach ($categories as $category) {
-            if($category === "all"){
-                $query->orWhere('category', '!=', null);
-            }
-            $query->orWhereJsonContains('category', $category);
-        }
+    
+    if(in_array("all", $categories) || in_array("All", $categories)){
+        return;
+    }
+    $query->whereJsonContains('category', $categories);
+
+    
     })
     ->whereIn('user_id', $users->pluck('id')) 
     ->get();
@@ -126,13 +141,15 @@ foreach ($users as $user) {
         'rating' => $ratings
     ];
 }
-//paginate the result 
+
+
 $results = collect($results)->forPage($page, $limit)->values();
-
     return response()->json([
-        'artists' => $results
+        'artists' => $results,
+        'total' => count($results),
+        'previousPage' => $page > 1,
+        'nextPage' => $results->count() > $page + 1
     ]);
-
 
 }
 

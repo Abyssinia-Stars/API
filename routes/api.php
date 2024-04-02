@@ -74,11 +74,11 @@ Route::middleware('auth:api')->group(function () {
 
 });
 
-Route::get('/get-random-artists', [CustomerController::class, 'getRandomAritsts']);
-Route::get('/get-random-categories', [CustomerController::class, 'getRandomCategories']);
-Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);   
+Route::get('/random-artists', [CustomerController::class, 'getRandomAritsts']);
+Route::get('/random-categories', [CustomerController::class, 'getRandomCategories']);
+Route::get('/popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);   
 Route::get("reviews", [ArtistProfileController::class, 'getReviews']);
-Route::get("/get-artists", [CustomerController::class, 'getArtistByParams']);
+Route::get("/artists", [CustomerController::class, 'getArtistByParams']);
 
 
 
