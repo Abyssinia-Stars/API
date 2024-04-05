@@ -17,6 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('artist_id');
             $table->integer('rating');
             $table->text('review');
+            $table->text('description')->nullable();
+
             $table->timestamps();
         });
     }

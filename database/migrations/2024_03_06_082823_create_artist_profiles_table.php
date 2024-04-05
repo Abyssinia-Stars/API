@@ -19,6 +19,8 @@ return new class extends Migration
             $table->json('category');
             $table->json('youtube_links')->nullable();
             $table->json('attachments')->nullable();
+            $table->string('price_rate')->nullable();
+
 
             $table->timestamps();
         });
