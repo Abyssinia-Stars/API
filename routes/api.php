@@ -68,9 +68,9 @@ Route::middleware('auth:api')->group(function () {
 
         Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
         Route::apiResource('/payment-info', PaymentInfoController::class);
+        Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
     });
 
-Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
 
     });
     
