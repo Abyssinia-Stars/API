@@ -4,33 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ArtistProfile extends Model
+class Review extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'bio',
-        'category',
-        'youtube_links',
-        'attachments',
-        'role',
-        'price_rate'
-    ];
-
-    protected $casts = [
-        'category' => 'array',
-        'youtube_links' => 'array',
-        'attachments' => 'array',
+        'artist_id',
+        'rating',
+        'review',
+        'description'
     ];
 
     protected $hidden =[
         'created_at',
         'updated_at'
     ];
-
     public function user()
     {
         return $this->belongsTo(User::class);
