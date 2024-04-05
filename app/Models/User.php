@@ -50,7 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'updated_at',
         'email_verified_at',
 
-        'phone_number'  
+        'phone_number'
     ];
 
     /**
@@ -103,5 +103,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function artistProfile()
     {
         return $this->hasOne(ArtistProfile::class);
+    }
+    public function paymentInfo()
+    {
+        return $this->hasOne(PaymentInfo::class);
     }
 }

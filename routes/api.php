@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PaymentInfoController;
 use App\Models\Offer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,24 +41,18 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
     
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
-    
-    
-    
     Route::prefix("notification/manager")->middleware('manager')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ManagerController::class, 'handleResponse']);
         Route::get('/', [ManagerController::class, 'getNotifications']);
     });
-    
-    Route::prefix("notification/artist")->middleware('artist')->group(function(){
-        
+
+    Route::prefix("notification/artist")->middleware('artist')->group(function () {
+
         Route::post('/send-request/{userId}', [ArtistProfileController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ArtistProfileController::class, 'handleResponse']);
         Route::get('/', [ArtistProfileController::class, 'getNotifications']);
     });
-    
-    
-    
     Route::prefix('customer')->middleware('customer')->group(function () {
         Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');
         Route::get('/jobs', [JobController::class, 'index']);
@@ -71,20 +66,25 @@ Route::middleware('auth:api')->group(function () {
         Route::delete("reviews/{userId}", [CustomerController::class, 'removeReview']);
         Route::get("reviews", [CustomerController::class, 'getReviews']);
 
+        Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
+        Route::apiResource('/payment-info', PaymentInfoController::class);
+    });
+
 Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
 
     });
     
-});
+
 
 Route::get('/random-artists', [CustomerController::class, 'getRandomAritsts']);
 Route::get('/random-categories', [CustomerController::class, 'getRandomCategories']);
 Route::get('/popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);   
+Route::get('/get-random-artists', [CustomerController::class, 'getRandomAritsts']);
+Route::get('/get-random-categories', [CustomerController::class, 'getRandomCategories']);
+Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);
 Route::get("reviews", [ArtistProfileController::class, 'getReviews']);
 Route::get("/artists", [CustomerController::class, 'getArtistByParams']);
 Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
-
-
 
 Route::controller(OtpVerifyController::class)->group(function () {
     Route::post("/verify-otp", [OtpVerifyController::class, 'verify'])->name('otp.verify');
