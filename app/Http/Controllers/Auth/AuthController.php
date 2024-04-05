@@ -81,6 +81,10 @@ class AuthController extends Controller
 
         if (Auth::attempt($loginData)) {
             $user = Auth::user();
+            if($user->is_active === false){
+                return response()->json(['error' => 'Account has been Deactivated! Please Contact Support'], 401);
+            }
+
             $profile = null;
 
             if ($user->role === "artist") {
