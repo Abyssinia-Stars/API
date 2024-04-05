@@ -13,7 +13,8 @@ class Review extends Model
         'user_id',
         'artist_id',
         'rating',
-        'review'
+        'review',
+        'description'
     ];
 
     protected $hidden =[

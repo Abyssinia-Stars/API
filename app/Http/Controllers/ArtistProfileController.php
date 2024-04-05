@@ -6,6 +6,7 @@ use App\Models\ArtistProfile;
 use App\Models\User;
 use App\Models\Notification;
 use App\Models\Review;
+use App\Models\Favorites;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -161,21 +162,116 @@ class ArtistProfileController extends Controller
             ]
         ]);
     }
+    public function calculateAverageRating($review){
+       
+        if(count($review) == 0){
+            return 0;
+        }
+        return $review->avg('rating');
 
+    
+    }
+    
     public function getArtistProfile($id){
+
+       
         $artist = ArtistProfile::where('user_id', $id)->first();
+        $userProfile  = User::where('id', $id)->first();
+        $reviews= Review::where('artist_id', $id)->get();
+        $averageRating = $this->calculateAverageRating($reviews);
+
+   
+    
 
         if (!$artist) {
-            return response()->json(['error' => 'Artist not found'], 404);
+            return response()->json([
+                'id' => $userProfile->id,
+                'user_id' => $userProfile->id,
+                'bio' => null,
+                'name' => $userProfile->name,
+                'email' => $userProfile->email,
+                'category' => null,
+                'attchments' => null,
+                'youtube_links' =>null,
+                'profile_picture' => $userProfile->profile_picture,
+                'reviews' => $reviews,
+                'average_rating' => $averageRating,
+            ]);
         }
 
         return response()->json([
-            'id' => $artist->id,
+            'id' => $artist->id  ,
             'user_id' => $artist->user_id,
             'bio' => $artist->bio,
             'name' => $artist->user->name,
             'email' => $artist->user->email,
             'category' => $artist->category,
+            'attchments' => $artist->attachments,
+            'youtube_links' => $artist->youtube_links,
+            'profile_picture' => $userProfile->profile_picture,
+            'reviews' => $reviews,
+            'average_rating' => $averageRating,
+
+                // Add other user columns as needed
+        ]);
+
+    }
+
+    public function getArtistProfileWithAuth($id,$auth){
+
+        // return response()->json([
+        //     'id' => $id,
+        //     'auth' => $auth
+        // ]);
+        $isFavorite = false;
+        $artist = ArtistProfile::where('user_id', $id)->first();
+        $userProfile  = User::where('id', $id)->first();
+        $reviews= Review::where('artist_id', $id)->get();
+        $averageRating = $this->calculateAverageRating($reviews);
+
+        if($auth){
+
+            $isFavoriteVal = Favorites::where('user_id', auth()->user()->id)->where('artist_id', $id)->first();
+            if($isFavoriteVal){
+                $isFavorite = true;
+            }else{
+                $isFavorite = false;
+            }
+        }
+
+    
+
+        if (!$artist) {
+            return response()->json([
+                'id' => $userProfile->id,
+                'user_id' => $userProfile->id,
+                'bio' => null,
+                'name' => $userProfile->name,
+                'email' => $userProfile->email,
+                'category' => null,
+                'attchments' => null,
+                'youtube_links' =>null,
+                'profile_picture' => $userProfile->profile_picture,
+                'reviews' => $reviews,
+                'average_rating' => $averageRating,
+                'is_favorite' => $isFavorite
+            ]);
+        }
+
+        return response()->json([
+            'id' => $artist->id  ,
+            'user_id' => $artist->user_id,
+            'bio' => $artist->bio,
+            'name' => $artist->user->name,
+            'email' => $artist->user->email,
+            'category' => $artist->category,
+            'attchments' => $artist->attachments,
+            'youtube_links' => $artist->youtube_links,
+            'profile_picture' => $userProfile->profile_picture,
+            'reviews' => $reviews,
+            'average_rating' => $averageRating,
+            'is_favorite' => $isFavorite
+
                 // Add other user columns as needed
         ]);
 

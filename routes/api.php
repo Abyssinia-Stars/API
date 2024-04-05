@@ -38,40 +38,43 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
-    Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
-
+    
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
-
- 
-
+    
+    
+    
     Route::prefix("notification/manager")->middleware('manager')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ManagerController::class, 'handleResponse']);
         Route::get('/', [ManagerController::class, 'getNotifications']);
     });
-
+    
     Route::prefix("notification/artist")->middleware('artist')->group(function(){
-
+        
         Route::post('/send-request/{userId}', [ArtistProfileController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ArtistProfileController::class, 'handleResponse']);
         Route::get('/', [ArtistProfileController::class, 'getNotifications']);
     });
-
+    
     
     
     Route::prefix('customer')->middleware('customer')->group(function () {
         Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');
         Route::get('/jobs', [JobController::class, 'index']);
+        Route::post("/job", [JobController::class, 'store']);
         Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
         Route::apiResource('/job/offer', OfferController::class);
-        Route::post("favorites/add/{userId}", [CustomerController::class, 'addArtistToFavorites']);
+        Route::post("favorites/{userId}", [CustomerController::class, 'addArtistToFavorites']);
         Route::get("favorites", [CustomerController::class, 'getFavorites']);
-        Route::delete("favorites/remove/{userId}", [CustomerController::class, 'removeArtistFromFavorites']);
+        Route::delete("favorites/{userId}", [CustomerController::class, 'removeArtistFromFavorites']);
         Route::post("reviews/{userId}", [CustomerController::class, 'addReview']);
         Route::delete("reviews/{userId}", [CustomerController::class, 'removeReview']);
         Route::get("reviews", [CustomerController::class, 'getReviews']);
-    });
 
+Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
+
+    });
+    
 });
 
 Route::get('/random-artists', [CustomerController::class, 'getRandomAritsts']);
@@ -79,6 +82,7 @@ Route::get('/random-categories', [CustomerController::class, 'getRandomCategorie
 Route::get('/popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);   
 Route::get("reviews", [ArtistProfileController::class, 'getReviews']);
 Route::get("/artists", [CustomerController::class, 'getArtistByParams']);
+Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
 
 
 

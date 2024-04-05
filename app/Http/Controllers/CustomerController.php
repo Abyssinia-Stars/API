@@ -79,6 +79,15 @@ class CustomerController extends Controller
         }
         return $totalRating/$totalReviews;
     }
+    public function calculateAverageRatings($review){
+       
+        if(count($review) == 0){
+            return 0;
+        }
+        return $review->avg('rating');
+
+    
+    }
 public function getArtistByParams(Request $request){
 
     $validate = Validator::make($request->all(), [
@@ -126,19 +135,23 @@ $artistProfiles = ArtistProfile::where(function ($query) use ($categories) {
     ->whereIn('user_id', $users->pluck('id')) 
     ->get();
 
-$reviewProfiles = Review::whereIn('artist_id', $artistProfiles->pluck('user_id'));
+// $reviewProfiles = Review::where('artist_id', $users->pluck('id'))->get();
+$averageRatings = [];
+ 
+
 
 $results = [];
 foreach ($users as $user) {
     $profile = $artistProfiles->firstWhere('user_id', $user->id);
-    $ratings = $reviewProfiles->firstWhere('artist_id', $user->id);
+    // $ratings = $reviewProfiles->firstWhere('artist_id', $user->id);
+    $averageRating = $this->calculateAverageRating($user);
     if(!$profile){
         continue;
     }
     $results[] = [
         'user' => $user,
-        'profile' => $profile,
-        'rating' => $ratings
+        // 'profile' => $reviewProfiles,
+        'rating' => $averageRating
     ];
 }
 
@@ -229,7 +242,8 @@ $results = collect($results)->forPage($page, $limit)->values();
         
         $validate = Validator::make($request->all(), [
             'rating' => 'required|numeric|min:1|max:5',
-            'review' => 'required|string'
+            'review' => 'required|string',
+            'description' => 'string|nullable'
         ]);
         
         if($validate->fails()){
@@ -258,7 +272,8 @@ $results = collect($results)->forPage($page, $limit)->values();
                 'user_id' => auth()->id(),
                 'artist_id' => $artist->id,
                 'rating' => $request->rating,
-                'review' => $request->review
+                'review' => $request->review,
+                'description' => $request->description
             ]);
 
             return response()->json([

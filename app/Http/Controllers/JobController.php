@@ -47,8 +47,8 @@ class JobController extends Controller
             'catagory' => 'string|required|max:255',
             'description' => 'string|required',
             'status' => 'string|required',
-            'from_date' => 'date|required',
-            'to_date' => 'date|required',
+            'from_date' => 'string|required',
+            'to_date' => 'string|required',
         ]);
 
         if ($validation->fails()) {
@@ -72,7 +72,7 @@ class JobController extends Controller
                 ]
             );
 
-            return response()->json(['message' => 'Job created successfully', 'Job Details' => $jobDetails]);
+            return response()->json(['message' => 'Job created successfully', 'Job Details' => $jobDetails], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error creating Job Details: ' . $e->getMessage()], 500);
         }
