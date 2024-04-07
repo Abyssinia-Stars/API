@@ -40,10 +40,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
-<<<<<<< Updated upstream
     Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
-=======
->>>>>>> Stashed changes
 
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
 
@@ -54,7 +51,6 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix("notification/artist")->middleware('artist')->group(function () {
-
         Route::post('/send-request/{userId}', [ArtistProfileController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ArtistProfileController::class, 'handleResponse']);
         Route::get('/', [ArtistProfileController::class, 'getNotifications']);
@@ -71,18 +67,9 @@ Route::middleware('auth:api')->group(function () {
         Route::post("reviews/add/{userId}", [CustomerController::class, 'addReview']);
         Route::delete("reviews/remove/{userId}", [CustomerController::class, 'removeReview']);
         Route::get("reviews", [CustomerController::class, 'getReviews']);
-
-<<<<<<< Updated upstream
-        Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
-        Route::apiResource('/payment-info', PaymentInfoController::class);
     });
 
-});
-
-=======
-        Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
-    });
-
+    Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
     // payment
     Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
     Route::apiResource('/payment-info', PaymentInfoController::class);
@@ -96,7 +83,6 @@ Route::get("/callback/{reference}", [BalanceController::class, 'callback'])->nam
 Route::get('/random-artists', [CustomerController::class, 'getRandomAritsts']);
 Route::get('/random-categories', [CustomerController::class, 'getRandomCategories']);
 Route::get('/popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);
->>>>>>> Stashed changes
 Route::get('/get-random-artists', [CustomerController::class, 'getRandomAritsts']);
 Route::get('/get-random-categories', [CustomerController::class, 'getRandomCategories']);
 Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);
