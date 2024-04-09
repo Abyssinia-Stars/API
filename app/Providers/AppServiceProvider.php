@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
+use App\Models\User;
+
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -19,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        User::created(function ($user) {
+            // Create a balance record for the user
+            $user->balance()->create(['balance' => 0, 'user_id' => $user->id, 'onhold_balance' => 0]); // Assuming you have an 'amount' column in your balances table
+        });
     }
 }

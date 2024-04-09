@@ -8,6 +8,7 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ArtistProfileController;
 use App\Http\Controllers\Auth\OtpVerifyController;
@@ -48,7 +49,6 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix("notification/artist")->middleware('artist')->group(function () {
-
         Route::post('/send-request/{userId}', [ArtistProfileController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ArtistProfileController::class, 'handleResponse']);
         Route::get('/', [ArtistProfileController::class, 'getNotifications']);
@@ -65,20 +65,22 @@ Route::middleware('auth:api')->group(function () {
         Route::post("reviews/{userId}", [CustomerController::class, 'addReview']);
         Route::delete("reviews/{userId}", [CustomerController::class, 'removeReview']);
         Route::get("reviews", [CustomerController::class, 'getReviews']);
-
-        Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
-        Route::apiResource('/payment-info', PaymentInfoController::class);
         Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
     });
 
+    // payment
+    Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
+    Route::apiResource('/payment-info', PaymentInfoController::class);
 
-    });
-    
+    Route::post("/deposit", [BalanceController::class, 'store']);
+    Route::get('/balance', [BalanceController::class, 'getBalance']);
+});
 
 
+Route::get("/callback/{reference}", [BalanceController::class, 'callback'])->name('callback');
 Route::get('/random-artists', [CustomerController::class, 'getRandomAritsts']);
 Route::get('/random-categories', [CustomerController::class, 'getRandomCategories']);
-Route::get('/popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);   
+Route::get('/popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);
 Route::get('/get-random-artists', [CustomerController::class, 'getRandomAritsts']);
 Route::get('/get-random-categories', [CustomerController::class, 'getRandomCategories']);
 Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);
