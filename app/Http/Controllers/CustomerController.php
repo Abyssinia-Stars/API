@@ -16,7 +16,7 @@ class CustomerController extends Controller
 {
     //
     public function getRandomAritsts(){
-        $artists = User::where('role', 'artist')->inRandomOrder()->limit(6)->get();
+        $artists = User::where('role', 'artist')->inRandomOrder()->limit(10)->get();
         $artistsWithRating = [];
 
         foreach($artists as $artist){
@@ -42,13 +42,13 @@ class CustomerController extends Controller
         foreach($artists as $artist){
            
             $averageRating = $this->calculateAverageRating($artist);
-            if($averageRating > 0){
+            // if($averageRating > 0){
 
                 $artistsWithRating[] = [
                     'artist' => $artist,
                     'rating' => $averageRating
                 ];
-            }
+            // }
         }
 
         usort($artistsWithRating, function($a, $b){
@@ -56,6 +56,10 @@ class CustomerController extends Controller
             return $b['rating'] <=> $a['rating'];
         });
  
+        //send only the first 10
+
+        $artistsWithRating = array_slice($artistsWithRating, 0, 10);
+        
         
         return response()->json([
 
@@ -112,7 +116,7 @@ public function getArtistByParams(Request $request){
 
 
     $users = User::where('role', 'artist')
-    ->where('is_verified', 'verified')
+    // ->where('is_verified', 'verified')
     ->where('is_active', true)
     ->where(function ($query) use ($q) {
         $query->where('name', 'like', "%$q%")

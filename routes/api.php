@@ -85,7 +85,6 @@ Route::get("/artists", [CustomerController::class, 'getArtistByParams']);
 Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
 
 
-
 Route::controller(OtpVerifyController::class)->group(function () {
     Route::post("/verify-otp", [OtpVerifyController::class, 'verify'])->name('otp.verify');
     Route::post('/resend-otp', 'resendOtp')->name('otp.resend');
