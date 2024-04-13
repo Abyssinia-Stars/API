@@ -11,6 +11,7 @@ class TxnHistory extends Model
     protected $fillable = [
         'tx_ref',
         'amount',
+        'charge',
         'from',
         'to',
         'reason',

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PaymentInfoController;
+use App\Http\Controllers\TxnHistoryController;
 use App\Models\Offer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,7 +41,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
-    
+
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
     Route::prefix("notification/manager")->middleware('manager')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
@@ -74,6 +75,9 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post("/deposit", [BalanceController::class, 'store']);
     Route::get('/balance', [BalanceController::class, 'getBalance']);
+    Route::post('/withdraw', [BalanceController::class, 'withdraw']);
+    Route::get('/banks', [BalanceController::class, 'getBanks']);
+    Route::get('/txn-history', [TxnHistoryController::class, 'index']);
 });
 
 

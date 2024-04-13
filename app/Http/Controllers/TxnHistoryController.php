@@ -26,9 +26,9 @@ class TxnHistoryController extends Controller
         $limit = $request->input('limit', 10);
         $page = $request->input('page', 1);
 
-        $user_id = Auth::user();
+        $user_id = Auth::user()->id;
         $txn_histories = TxnHistory::where('to', $user_id)->orWhere('from', $user_id)->paginate($limit, ['*'], 'page', $page);
-        return $txn_histories;
+        return response()->json($txn_histories);
     }
 
     /**
