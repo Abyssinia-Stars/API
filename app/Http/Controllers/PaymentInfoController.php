@@ -63,7 +63,7 @@ class PaymentInfoController extends Controller
     {
         $user_id = Auth::user()->id;
         $payment_info = PaymentInfo::where('user_id', $user_id)->firstOrFail();
-        return response()->json($payment_info);
+        return $payment_info;
     }
 
     /**

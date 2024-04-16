@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\PaymentInfoController;
+use App\Http\Controllers\PlansController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TxnHistoryController;
 use App\Models\Offer;
 use Illuminate\Http\Request;
@@ -78,8 +80,13 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/withdraw', [BalanceController::class, 'withdraw']);
     Route::get('/banks', [BalanceController::class, 'getBanks']);
     Route::get('/txn-history', [TxnHistoryController::class, 'index']);
+
+    // subscription
+    Route::post("/subscribe", [SubscriptionController::class, "subscribe"]);
 });
 
+Route::get("/plans", [PlansController::class, "index"]);
+Route::post("/subscribe/callback/{reference}", [SubscriptionController::class, "callback"])->name("subscription_callback");
 
 Route::get("/callback/{reference}", [BalanceController::class, 'callback'])->name('callback');
 Route::get('/random-artists', [CustomerController::class, 'getRandomAritsts']);
