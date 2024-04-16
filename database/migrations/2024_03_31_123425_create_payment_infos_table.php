@@ -19,6 +19,9 @@ return new class extends Migration {
             $table->string('phone_number')->unique()->nullable();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string('account_number')->nullable();
+            $table->string('bank_code')->nullable();
+            $table->string('account_name')->nullable();
             $table->timestamps();
         });
     }

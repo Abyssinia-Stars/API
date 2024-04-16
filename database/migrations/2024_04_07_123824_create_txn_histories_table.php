@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->string('tx_ref');
             $table->double('amount', 15, 4);
+            $table->double('charge', 15, 4);
             $table->unsignedBigInteger('from');
             $table->foreign('from')->references('id')->on('users');
             $table->unsignedBigInteger('to');

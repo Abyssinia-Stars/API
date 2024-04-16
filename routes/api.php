@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PaymentInfoController;
+use App\Http\Controllers\TxnHistoryController;
 use App\Models\Offer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +19,6 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\FileUpload\UserProfileController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\TxnHistoryController;
 use App\Events\SendNotificationTry;
 use  App\Events\TryMessage;
 use App\Jobs\SendNotification;
@@ -46,6 +46,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
     Route::post('/profile', [UserProfileController::class, 'update']);
     Route::delete('/profile', [UserProfileController::class, 'destroy']);
+
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
     Route::prefix("notification/manager")->middleware('manager')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
@@ -77,7 +78,6 @@ Route::middleware('auth:api')->group(function () {
 
     // payment
     Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
-    Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
     Route::post('/payment-info', [PaymentInfoController::class,'store']);
     Route::patch('/payment-info', [PaymentInfoController::class, 'update']);
     Route::delete('/payment-info', [PaymentInfoController::class, 'destroy']);
@@ -85,6 +85,9 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post("/deposit", [BalanceController::class, 'store']);
     Route::get('/balance', [BalanceController::class, 'getBalance']);
+    Route::post('/withdraw', [BalanceController::class, 'withdraw']);
+    Route::get('/banks', [BalanceController::class, 'getBanks']);
+    Route::get('/txn-history', [TxnHistoryController::class, 'index']);
 });
 
 

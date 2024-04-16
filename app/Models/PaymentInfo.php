@@ -15,7 +15,10 @@ class PaymentInfo extends Model
         'email',
         'currency',
         'phone_number',
-        'user_id'
+        'user_id',
+        'account_name',
+        'account_number',
+        'bank_code'
     ];
 
     public function Users()

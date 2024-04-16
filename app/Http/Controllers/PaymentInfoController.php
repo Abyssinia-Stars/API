@@ -30,6 +30,9 @@ class PaymentInfoController extends Controller
             'email' => 'required|email',
             'currency' => 'required|in:USD,ETB',
             'phone_number' => 'required|string',
+            'account_name' => 'required|string',
+            'account_number' => 'required|string',
+            'bank_code' => 'required|string'
         ]);
 
         if ($validated->fails()) {
