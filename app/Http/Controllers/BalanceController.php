@@ -112,6 +112,7 @@ class BalanceController extends Controller
 
     public function withdraw(Request $request)
     {
+
         $validated = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:0',
         ]);
@@ -150,6 +151,7 @@ class BalanceController extends Controller
             "reference" => $reference,
             "bank_code" => $payment_info->bank_code,
         ];
+        Log::info($data);
 
         $secret = env('CHAPA_SECRET_KEY');
         $res = Http::withToken($secret)->post('https://api.chapa.co/v1/transfers', $data);
@@ -189,5 +191,7 @@ class BalanceController extends Controller
         $res = Http::withToken($secret)->get('https://api.chapa.co/v1/banks');
         return response()->json($res->json(), $res->status());
     }
+
+    
 
 }

@@ -69,8 +69,10 @@ class PaymentInfoController extends Controller
     public function getPaymentInfo()
     {
         $user_id = Auth::user()->id;
-        $payment_info = PaymentInfo::where('user_id', $user_id)->firstOrFail();
-        return $payment_info;
+        $payment_info = PaymentInfo::where('user_id', $user_id)->get();
+
+       //return the payment info as an Array 
+        return response()->json($payment_info, 200);
     }
 
     /**

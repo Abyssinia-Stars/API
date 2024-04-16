@@ -68,7 +68,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post("/job", [JobController::class, 'store']);
         Route::delete('/job/{id}', [JobController::class, 'destroy']);
         Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
-        Route::apiResource('/job/offer', OfferController::class);
+        Route::post('/job/offer', [OfferController::class, 'store']);
         Route::post("favorites/{userId}", [CustomerController::class, 'addArtistToFavorites']);
         Route::get("favorites", [CustomerController::class, 'getFavorites']);
         Route::delete("favorites/{userId}", [CustomerController::class, 'removeArtistFromFavorites']);
@@ -76,6 +76,9 @@ Route::middleware('auth:api')->group(function () {
         Route::delete("reviews/{userId}", [CustomerController::class, 'removeReview']);
         Route::get("reviews", [CustomerController::class, 'getReviews']);
         Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
+    Route::get("/offers", [OfferController::class, "showOffersByClient"]);
+    Route::put("/jobs/{id}/completed", [OfferController::class, "jobIsOver"]);
+
     });
 
     // payment
@@ -93,6 +96,9 @@ Route::middleware('auth:api')->group(function () {
 
     // subscription
     Route::post("/subscribe", [SubscriptionController::class, "subscribe"]);
+
+    Route::get("/artist/offers", [OfferController::class, "showOffersByArtist"]);
+    Route::put("/artist/offers/{id}/{status}", [OfferController::class, "acceptOffer"]);
 });
 
 Route::get("/plans", [PlansController::class, "index"]);
