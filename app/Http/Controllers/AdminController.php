@@ -6,6 +6,9 @@ use App\Models\User;
 use App\Models\ArtistProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Events\SendNotificationTry;
+use Illuminate\Support\Facades\Broadcast;
+use App\Events\VerifyIdEvent;
 
 class AdminController extends Controller
 {
@@ -109,6 +112,7 @@ class AdminController extends Controller
 
         $out = new \Symfony\Component\Console\Output\ConsoleOutput();
         $out->writeln($request->all());
+        // $user = auth()->user();
 
         $request->validate([
             "is_verified" => "required|in:pending,unverified,verified"
@@ -116,6 +120,9 @@ class AdminController extends Controller
 
         $user->is_verified = $request->is_verified;
         $user->save();
+        broadcast(new VerifyIdEvent($request->is_verified, $user->id));
         return response()->json(['message' => 'User verification status updated successfully']);
     }
+
+
 }

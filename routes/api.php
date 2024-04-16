@@ -18,7 +18,11 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\FileUpload\UserProfileController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\CustomerController;
-
+use App\Http\Controllers\TxnHistoryController;
+use App\Events\SendNotificationTry;
+use  App\Events\TryMessage;
+use App\Jobs\SendNotification;
+use App\Jobs\HandleMessage;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -40,7 +44,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
-    
+    Route::post('/profile', [UserProfileController::class, 'update']);
+    Route::delete('/profile', [UserProfileController::class, 'destroy']);
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
     Route::prefix("notification/manager")->middleware('manager')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
@@ -56,7 +61,9 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('customer')->middleware('customer')->group(function () {
         Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');
         Route::get('/jobs', [JobController::class, 'index']);
+        Route::get('/job/{id}', [JobController::class, 'getJob']);
         Route::post("/job", [JobController::class, 'store']);
+        Route::delete('/job/{id}', [JobController::class, 'destroy']);
         Route::get('/jobs/{id}', [JobController::class, 'showJobsByClient']);
         Route::apiResource('/job/offer', OfferController::class);
         Route::post("favorites/{userId}", [CustomerController::class, 'addArtistToFavorites']);
@@ -70,7 +77,11 @@ Route::middleware('auth:api')->group(function () {
 
     // payment
     Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
-    Route::apiResource('/payment-info', PaymentInfoController::class);
+    Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
+    Route::post('/payment-info', [PaymentInfoController::class,'store']);
+    Route::patch('/payment-info', [PaymentInfoController::class, 'update']);
+    Route::delete('/payment-info', [PaymentInfoController::class, 'destroy']);
+    Route::get('/txn-history', [TxnHistoryController::class, 'index']);
 
     Route::post("/deposit", [BalanceController::class, 'store']);
     Route::get('/balance', [BalanceController::class, 'getBalance']);
@@ -101,10 +112,21 @@ Route::controller(AuthController::class)->group(function () {
         Route::post("/{user}/set-verification-status", [AdminController::class, 'setVerificationStatus']);
         Route::post("/{user}/get", [AdminController::class, 'getUser']);
     });
-
+    
     Route::post('/register', 'registerUser')->name('auth.register');
     Route::post('/login', 'loginUser')->name('auth.login');
 });
+
+Route::get("/notification_try", function(){
+    // broadcast(new SendNotificationTry());
+    // SendNotification::dispatch();
+    // HandleMessage::dispatch()
+    broadcast(new TryMessage());
+    return response()->json([
+        'a'=>'b'
+    ]);
+} );
+
 
 
 Route::controller(VerificationController::class)->group(function () {

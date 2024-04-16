@@ -46,7 +46,7 @@ class BalanceController extends Controller
         // Enter the details of the payment
         $data = [
             'amount' => $request->input('amount'),
-            'email' => $user->email,
+            'email' => $payment_info->email,
             'tx_ref' => $reference,
             'currency' => $payment_info->currency,
             'callback_url' => route('callback', [$reference, 'user_id' => $user->id]),
@@ -59,6 +59,7 @@ class BalanceController extends Controller
         ];
 
         $payment = Chapa::initializePayment($data);
+        return response()->json($payment, 200);
 
         if ($payment['status'] !== 'success') {
             return response()->json([
@@ -78,7 +79,12 @@ class BalanceController extends Controller
     {
 
         $data = Chapa::verifyTransaction($reference);
+
+        
         $user_id = $request->input('user_id');
+        // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $out->writeln($data)
+        // return response()->json($data, 200);    
         //if payment is successful
         Log::info(json_encode($data) . ' ' . $user_id);
         if ($data['status'] == 'success') {
@@ -105,9 +111,11 @@ class BalanceController extends Controller
 
     public function getBalance()
     {
-        $user_id = Auth::user();
+        $user_id = Auth::user()->id;
         $balance = Balance::where("user_id", $user_id)->first();
-        return $balance;
+
+        return response()->json([
+            'balance' => $balance], 200);
     }
 
 }

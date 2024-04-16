@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('client_id');
             $table->foreign('client_id')->references('id')->on('users')->onDelete('cascade');
-            $table->unsignedBigInteger('job_id');
-            $table->foreign('job_id')->references('id')->on('jobs')->onDelete('cascade');
+            $table->unsignedBigInteger('work_id');
+            $table->foreign('work_id')->references('id')->on('works')->onDelete('cascade');
             $table->unsignedBigInteger('artist_id');
             $table->foreign('artist_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('status');

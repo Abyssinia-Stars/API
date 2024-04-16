@@ -15,7 +15,7 @@ class OfferController extends Controller
 
     public function showOffersByJob($id)
     {
-        $offers = Offer::where('job_id', $id)->get();
+        $offers = Offer::where('work_id', $id)->get();
         return response()->json(['Offers' => $offers]);
     }
 
@@ -48,6 +48,8 @@ class OfferController extends Controller
     public function create()
     {
         //
+        
+
     }
 
     /**
@@ -59,7 +61,7 @@ class OfferController extends Controller
         $client_id = Auth::user()->id;
 
         $validation = Validator::make($request->all(), [
-            'job_id' => 'required|exists:jobs,id',
+            'work_id' => 'required|exists:works,id',
             'artist_id' => 'required|exists:users,id',
             'price' => 'required|numeric',
         ]);
@@ -77,7 +79,7 @@ class OfferController extends Controller
             // Create the ArtistProfile with the validated data
             $offerDetails = Offer::create(
                 [
-                    'job_id' => $request->job_id,
+                    'work_id' => $request->work_id,
                     'client_id' => $client_id,
                     'artist_id' => $request->artist_id,
                     'status' => "pending",
@@ -126,7 +128,7 @@ class OfferController extends Controller
 
         $validation = Validator::make($request->all(), [
 
-            'job_id' => 'required|exists:jobs,id',
+            'work_id' => 'required|exists:works,id',
             'client_id' => 'required|exists:users,id',
             'artist_id' => 'required|exists:users,id',
             'status' => 'string|required',

@@ -49,7 +49,14 @@ class PaymentInfoController extends Controller
         $data = $validated->validated();
         $data['user_id'] = $user->id; // Assign the authenticated user's ID
 
+        if(PaymentInfo::where('user_id', $user->id)->exists()){
+            return response()->json([
+                'message' => 'Payment info already exists',
+            ], 400);
+        }
         $response = PaymentInfo::create($data);
+        //send the response as an object and not an arrat
+        
         return response()->json($response, 201);
     }
 
@@ -59,16 +66,56 @@ class PaymentInfoController extends Controller
     public function getPaymentInfo()
     {
         $user_id = Auth::user()->id;
-        $payment_info = PaymentInfo::where('user_id', $user_id)->firstOrFail();
-        return response()->json($payment_info);
+        $payment_info = PaymentInfo::where('user_id', $user_id)->get();
+        return response()->json($payment_info, 201);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PaymentInfo $paymentInfo)
+    public function update(Request $request)
     {
         //
+
+        $user = Auth::user();
+
+        $validated = Validator::make($request->all(), [
+            'first_name' => 'string',
+            'last_name' => 'string',
+            'email' => 'email',
+            'currency' => 'in:USD,ETB',
+            'phone_number' => 'string',
+        ]);
+
+        if ($validated->fails()) {
+            return response()->json([
+                'message' => 'Bad Request',
+                'errors' => $validated->errors()
+            ], 400);
+        }
+
+        // Ensure the authenticated user exists
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $data = $validated->validated();
+        $data['user_id'] = $user->id; // Assign the authenticated user's ID
+
+        if(!PaymentInfo::where('user_id', $user->id)->exists()){
+            return response()->json([
+                'message' => 'Payment info does not exist',
+            ], 400);
+        }
+
+        $payment_info = PaymentInfo::where('user_id', $user->id)->first();
+        $payment_info->update($data);
+
+        return response()->json($payment_info, 201);
+
+
     }
 
     /**
@@ -77,5 +124,25 @@ class PaymentInfoController extends Controller
     public function destroy(PaymentInfo $paymentInfo)
     {
         //
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        if(!PaymentInfo::where('user_id', $user->id)->exists()){
+            return response()->json([
+                'message' => 'Payment info does not exist',
+            ], 400);
+        }
+
+        $payment_info = PaymentInfo::where('user_id', $user->id)->first();
+        $payment_info->delete();
+
+        return response()->json([
+            'message' => 'Payment info deleted successfully',
+        ], 200);
     }
 }

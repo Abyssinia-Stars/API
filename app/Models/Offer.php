@@ -11,12 +11,12 @@ class Offer extends Model
 
 
 
-    protected $fillable = ['job_id','client_id','artist_id', 'status', 'price'];
+    protected $fillable = ['work_id','client_id','artist_id', 'status', 'price'];
 
 
     public function Jobs()
     {
-        return $this->belongsTo('App\Models\Job');
+        return $this->belongsTo('App\Models\Work');
     }
 
     public function Users()

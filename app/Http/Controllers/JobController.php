@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Job;
+use App\Models\Work;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Validator;
@@ -19,7 +19,7 @@ class JobController extends Controller
         $client_id = Auth::user()->id;
 
         try {
-            $job = Job::where('client_id', $client_id)->where('id', $id)->first();
+            $job = Work::where('client_id', $client_id)->where('id', $id)->first();
 
             return response()->json(['message' => 'Job Found', 'Job Details' => $job]);
         } catch (\Exception $e) {
@@ -32,7 +32,7 @@ class JobController extends Controller
     {
         $id = Auth::user()->id;
 
-        $jobs = Job::where('client_id', $id)->get();
+        $jobs = Work::where('client_id', $id)->get();
         return response()->json($jobs);
     }
 
@@ -59,7 +59,7 @@ class JobController extends Controller
 
         try {
             // Create the ArtistProfile with the validated data
-            $jobDetails = Job::create(
+            $jobDetails =Work::create(
                 [
                     'title' => $validatedData['title'],
                     'client_id' => $validatedData['client_id'],
@@ -86,7 +86,7 @@ class JobController extends Controller
         $client_id = Auth::user()->id;
 
         try {
-            $job = Job::where('client_id', $client_id)->where('id', $id)->first();
+            $job = Work::where('client_id', $client_id)->where('id', $id)->first();
             return response()->json($job);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error creating Job Details: ' . $e->getMessage()], 500);
@@ -117,7 +117,7 @@ class JobController extends Controller
 
         try {
             // Create the ArtistProfile with the validated data
-            $jobDetails = Job::where('id', $job->id)->update(
+            $jobDetails =Work::where('id', $job->id)->update(
                 [
                     'title' => $validatedData['title'],
                     'client_id' => $validatedData['client_id'],
@@ -140,13 +140,22 @@ class JobController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Job $job)
+    public function destroy(Work $job,$id)
     {
         try {
+            $job = Work::where('id', $id)->first();
+    
             $job->delete();
-            return response()->json(['message' => 'Job Deleted successfully']);
+            return response()->json(['message' => 'Job Deleted successfully'],200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error Deleting Job Details: ' . $e->getMessage()], 500);
         }
     }
+
+    public function getJob($id)
+    {
+        $job = Work::where('id', $id)->first();
+        return response()->json($job);
+    }
+    
 }

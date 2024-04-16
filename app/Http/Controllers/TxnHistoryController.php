@@ -26,9 +26,25 @@ class TxnHistoryController extends Controller
         $limit = $request->input('limit', 10);
         $page = $request->input('page', 1);
 
-        $user_id = Auth::user();
+        $user_id = Auth::user()->id;
         $txn_histories = TxnHistory::where('to', $user_id)->orWhere('from', $user_id)->paginate($limit, ['*'], 'page', $page);
-        return $txn_histories;
+       
+        //change the user_id to and from from a number to a name 
+        foreach ($txn_histories as $txn_history) {
+            $txn_history->to = Auth::user()->where('id', $txn_history->to)->first()->name;
+            $txn_history->from = Auth::user()->where('id', $txn_history->from)->first()->name;
+        }
+        
+
+
+      if ($txn_histories->isEmpty()) {
+            return response()->json([
+                'message' => 'No transaction history found'
+            ], 404);
+        }
+        return response()->json([
+            'txn_histories' => $txn_histories
+        ],200);
     }
 
     /**
@@ -45,6 +61,7 @@ class TxnHistoryController extends Controller
     public function show(TxnHistory $txnHistory)
     {
         //
+        
     }
 
     /**

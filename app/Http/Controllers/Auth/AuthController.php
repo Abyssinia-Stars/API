@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Storage;
+use App\Events\VerifyIdEvent;
 
 class AuthController extends Controller
 {
@@ -81,6 +82,9 @@ class AuthController extends Controller
 
         if (Auth::attempt($loginData)) {
             $user = Auth::user();
+            if($user->is_deleted === 1){
+                return response()->json(['error' => "Account Doesn't exist"], 401);
+            }
             if($user->is_active === false){
                 return response()->json(['error' => 'Account has been Deactivated! Please Contact Support'], 401);
             }
@@ -130,6 +134,8 @@ class AuthController extends Controller
         $user->id_image = $idImagePath;
         $user->is_verified = 'pending';
         $user->save();
+
+        broadcast(new VerifyIdEvent($user->name . 'Wants to Verify ID', 1));
         return response()->json(['message' => 'ID image uploaded successfully', 'user' => $user]);
     }
 }

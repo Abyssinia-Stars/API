@@ -16,7 +16,7 @@ class CustomerController extends Controller
 {
     //
     public function getRandomAritsts(){
-        $artists = User::where('role', 'artist')->inRandomOrder()->limit(6)->get();
+        $artists = User::where('role', 'artist')->inRandomOrder()->limit(10)->get();
         $artistsWithRating = [];
 
         foreach($artists as $artist){
@@ -37,18 +37,25 @@ class CustomerController extends Controller
     public function getPopularArtistsByRating(){
 
         $artists = User::where('role', 'artist')->get();
-    
+        $artistProfiles = ArtistProfile::whereIn('user_id', $artists->pluck('id'))->get();
         $artistsWithRating = [];
         foreach($artists as $artist){
            
             $averageRating = $this->calculateAverageRating($artist);
-            if($averageRating > 0){
+            // if($averageRating > 0){
+
+
+                if($artistProfiles->firstWhere('user_id', $artist->id) == null){
+                    continue;
+                }
 
                 $artistsWithRating[] = [
                     'artist' => $artist,
-                    'rating' => $averageRating
+
+                    'rating' => $averageRating,
+                    'profile' => $artistProfiles->firstWhere('user_id', $artist->id),
                 ];
-            }
+            // }
         }
 
         usort($artistsWithRating, function($a, $b){
@@ -59,7 +66,8 @@ class CustomerController extends Controller
         
         return response()->json([
 
-            'artists' => $artistsWithRating
+            'artists' => $artistsWithRating,
+            
         ]);
 
 
@@ -120,8 +128,7 @@ public function getArtistByParams(Request $request){
     })
     ->get();
 
-    $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-    $out->writeln($categories);
+  
 
 $artistProfiles = ArtistProfile::where(function ($query) use ($categories) {
     
@@ -150,7 +157,7 @@ foreach ($users as $user) {
     }
     $results[] = [
         'user' => $user,
-        // 'profile' => $reviewProfiles,
+        'profile' => $profile,
         'rating' => $averageRating
     ];
 }
@@ -206,8 +213,15 @@ $results = collect($results)->forPage($page, $limit)->values();
     public function getFavorites(){
 
         $favorites = Favorites::where('user_id', auth()->user()->id)->get();
+        $favoritesWithName = [];
+        foreach($favorites as $favorite){
+            $artist = User::find($favorite->artist_id);
+            $userProfile = ArtistProfile::where('user_id', $artist->id)->first();
+            $artist->profile = $userProfile;
+            $favoritesWithName[] = $artist;
+        }
         return response()->json([
-            'favorites' => $favorites
+            'favorites' => $favoritesWithName
         ]);
 
     }
