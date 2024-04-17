@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Events\SendNotificationTry;
 use Illuminate\Support\Facades\Broadcast;
 use App\Events\VerifyIdEvent;
+use App\Models\Notification;
 
 class AdminController extends Controller
 {
@@ -119,8 +120,19 @@ class AdminController extends Controller
         ]);
 
         $user->is_verified = $request->is_verified;
+
         $user->save();
-        broadcast(new VerifyIdEvent($request->is_verified, $user->id));
+
+        $notification = new Notification([
+            'user_id' => $user->id,
+            'notification_type' => 'request',
+            'source_id' => 1,
+            'message' =>'Id Verification ' . $request->is_verified,
+            'title' => 'ID Verification',
+            'status' => 'unread'
+        ]);
+        $notification->save();
+        broadcast(new VerifyIdEvent($notification));
         return response()->json(['message' => 'User verification status updated successfully']);
     }
 

@@ -12,6 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Notification;
 
 class VerifyIdEvent implements ShouldBroadcastNow
 {
@@ -38,10 +39,11 @@ class VerifyIdEvent implements ShouldBroadcastNow
      * @param int $id
      * @return void
      */
-    public function __construct($message, $id)
+    public function __construct(
+        private Notification $notification
+    )
     {
-        $this->message = $message;
-        $this->id = $id;
+      
     }
 
     /**
@@ -52,11 +54,11 @@ class VerifyIdEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         
-        Log::info($this->id);
+        Log::info($this->notification);
         
         
         return [
-            new PrivateChannel('idverification.'.$this->id),
+            new PrivateChannel('idverification.'.$this->notification->user_id),
         ];
     }
 
@@ -67,10 +69,11 @@ class VerifyIdEvent implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
+
+        Log::info($this->notification);
+
         return [
-            'message' => $this->message,
-            'title' => 'New Id Verification',
-            'created_at' => now()->format('Y-m-d H:i:s'),
+            'notification' => $this->notification,
         ];
     }
 

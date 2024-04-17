@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Storage;
 use App\Events\VerifyIdEvent;
+use App\Models\Notification;
+
+
 
 class AuthController extends Controller
 {
@@ -81,6 +84,7 @@ class AuthController extends Controller
 
 
         if (Auth::attempt($loginData)) {
+
             $user = Auth::user();
             if($user->is_deleted === 1){
                 return response()->json(['error' => "Account Doesn't exist"], 401);
@@ -97,6 +101,24 @@ class AuthController extends Controller
 
             if ($user->hasVerifiedEmail()) {
                 $accessToken = $user->createToken('authToken')->accessToken;
+
+$notification = new Notification([
+    'user_id' => $user->id,
+    'notification_type' => 'system',
+    'source_id' => $user->id,
+    "title" => 'New Login',
+    'message' => 'From device : ' . $request->header('user-agent') ,
+    'status' => 'unread'
+]);
+
+$notification->save();
+
+broadcast(new VerifyIdEvent($notification));
+
+
+
+
+
                 return response()->json(['user' => $user, 'access_token' => $accessToken, 'profile' => $profile]);
             } else {
                 return response()->json(['error' => 'Email not verified'], 401);
@@ -135,7 +157,17 @@ class AuthController extends Controller
         $user->is_verified = 'pending';
         $user->save();
 
-        broadcast(new VerifyIdEvent($user->name . 'Wants to Verify ID', 1));
+        $notification = new Notification([
+            'user_id' => 1,
+            'notification_type' => 'request',
+            'source_id' => $user->id,
+            'title'=>"ID Verification",
+            'message' => $user->name . ' wants to verify ID',
+            'status' => 'unread'
+        ]);
+        $notification->save();
+
+        broadcast(new VerifyIdEvent($notification));
         return response()->json(['message' => 'ID image uploaded successfully', 'user' => $user]);
     }
 }

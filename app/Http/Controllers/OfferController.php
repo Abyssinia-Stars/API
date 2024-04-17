@@ -134,19 +134,19 @@ class OfferController extends Controller
                 ]
             );
 
-            $uuid = $client_id . Str::uuid();
+        // $uuid = $client_id . Str::uuid();
 
-            $txn_detail = TxnHistory::create(
-                [
-                    'tx_ref' =>  $uuid,
-                    'amount' => $request->price,
-                    'charge' => $our_amount,
-                    'from' => $client_id,
-                    'to' => $request->artist_id,
-                    'reason' => 'Offer',
-                    'type' => 'payment'
-                ]
-            );
+        // $txn_detail = TxnHistory::create(
+        //     [
+        //         'tx_ref' =>  $uuid,
+        //         'amount' => $request->price,
+        //         'charge' => $our_amount,
+        //         'from' => $client_id,
+        //         'to' => $request->artist_id,
+        //         'reason' => 'Offer',
+        //         'type' => 'payment'
+        //     ]
+        // );
 
 
 

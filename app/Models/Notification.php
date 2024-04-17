@@ -14,8 +14,10 @@ class Notification extends Model
         'user_id', 
         'notification_type', //enum 
         'source_id', 
+        'title',
         'message', 
-        'status'
+        'status',
+        
     ];
 
     // Define the relationship with the User model

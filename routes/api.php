@@ -19,6 +19,7 @@ use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\FileUpload\UserProfileController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\CustomerController;
 use App\Events\SendNotificationTry;
@@ -99,6 +100,14 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get("/artist/offers", [OfferController::class, "showOffersByArtist"]);
     Route::put("/artist/offers/{id}/{status}", [OfferController::class, "acceptOffer"]);
+
+
+    //notification
+
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/{id}', [NotificationController::class, 'show']);
+    Route::put('/notifications/{id}/{status}', [NotificationController::class, 'update']);
+    
 });
 
 Route::get("/plans", [PlansController::class, "index"]);

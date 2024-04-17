@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notifications', function (Blueprint $table) {
+    Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('notification_type', ['artist_manager', 'system', 'other']);
+            $table->enum('notification_type', ['request', 'system', 'payment']);
             $table->unsignedBigInteger('source_id');
+            $table->text('title');
             $table->text('message');
-            $table->enum('status',['unread','accepted','pending','rejected'])->default('unread');
+            $table->enum('status',['unread','accepted','pending','deleted'])->default('unread');
         });
     }
 
