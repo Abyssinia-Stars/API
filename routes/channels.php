@@ -29,6 +29,11 @@ Broadcast::channel('idverification.{userId}', function ($user, $userId) {
 return (int) $user->id === (int) $userId;
 });
 
+Broadcast::channel('messages.{userId}', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
+    });
+
+    
 // Broadcast::channel('idverification', function ($user){
 //     return true;
 // });

@@ -18,27 +18,6 @@ class VerifyIdEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
- /**
-     * The message to be broadcast.
-     *
-     * @var string
-     */
-    public $message;
-
-    /**
-     * The ID related to the event.
-     *
-     * @var int
-     */
-    public $id;
-
-    /**
-     * Create a new event instance.
-     *
-     * @param string $message
-     * @param int $id
-     * @return void
-     */
     public function __construct(
         private Notification $notification
     )

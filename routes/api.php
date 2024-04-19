@@ -22,6 +22,8 @@ use App\Http\Controllers\FileUpload\UserProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ConversationsController;
+use App\Http\Controllers\MessagesController;
 use App\Events\SendNotificationTry;
 use  App\Events\TryMessage;
 use App\Jobs\SendNotification;
@@ -107,6 +109,18 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/{id}', [NotificationController::class, 'show']);
     Route::put('/notifications/{id}/{status}', [NotificationController::class, 'update']);
+
+
+    //conversations 
+
+    Route::get('/conversations/{id}', [ConversationsController::class, 'index']);
+    Route::post('/conversations/messages/{participentId}', [ConversationsController::class, 'getConversationData']);
+
+    //messages
+
+    Route::get("/messages/{conversationId}", [MessagesController::class, 'index']);
+    Route::post("message", [MessagesController::class, 'store']);
+
     
 });
 
