@@ -48,7 +48,6 @@ class AuthController extends Controller
             "user_name" => "required|unique:users"
         ]);
 
-
         //  echo $request;
 
         if ($validation->fails()) {
@@ -86,10 +85,10 @@ class AuthController extends Controller
         if (Auth::attempt($loginData)) {
 
             $user = Auth::user();
-            if($user->is_deleted === 1){
+            if ($user->is_deleted === 1) {
                 return response()->json(['error' => "Account Doesn't exist"], 401);
             }
-            if($user->is_active === false){
+            if ($user->is_active === false) {
                 return response()->json(['error' => 'Account has been Deactivated! Please Contact Support'], 401);
             }
 
@@ -102,18 +101,18 @@ class AuthController extends Controller
             if ($user->hasVerifiedEmail()) {
                 $accessToken = $user->createToken('authToken')->accessToken;
 
-$notification = new Notification([
-    'user_id' => $user->id,
-    'notification_type' => 'system',
-    'source_id' => $user->id,
-    "title" => 'New Login',
-    'message' => 'From device : ' . $request->header('user-agent') ,
-    'status' => 'unread'
-]);
+                $notification = new Notification([
+                    'user_id' => $user->id,
+                    'notification_type' => 'system',
+                    'source_id' => $user->id,
+                    "title" => 'New Login',
+                    'message' => 'From device : ' . $request->header('user-agent'),
+                    'status' => 'unread'
+                ]);
 
-$notification->save();
+                $notification->save();
 
-broadcast(new VerifyIdEvent($notification));
+                broadcast(new VerifyIdEvent($notification));
 
 
 
@@ -161,7 +160,7 @@ broadcast(new VerifyIdEvent($notification));
             'user_id' => 1,
             'notification_type' => 'request',
             'source_id' => $user->id,
-            'title'=>"ID Verification",
+            'title' => "ID Verification",
             'message' => $user->name . ' wants to verify ID',
             'status' => 'unread'
         ]);
