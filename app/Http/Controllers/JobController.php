@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Offer;
 
 
 class JobController extends Controller
@@ -33,7 +34,18 @@ class JobController extends Controller
         $id = Auth::user()->id;
 
         $jobs = Work::where('client_id', $id)->get();
-        return response()->json($jobs);
+        // $offerCount = Offer::where('work_id', $jobs->id)->count();
+        $jobsWithOfferCount = [];
+
+        foreach ($jobs as $job) {
+            $offerCount = Offer::where('work_id', $job->id)->count();
+            $jobsWithOfferCount[] = [
+                'job' => $job,
+                'offerCount' => $offerCount
+            ];
+        }
+
+        return response()->json($jobsWithOfferCount);
     }
 
     /**
@@ -154,7 +166,10 @@ class JobController extends Controller
 
     public function getJob($id)
     {
-        $job = Work::where('id', $id)->first();
+        $user = Auth::user();
+        $job = Work::where('id', $id)->
+        where('client_id', $user->id)->
+        first();
         return response()->json($job);
     }
     
