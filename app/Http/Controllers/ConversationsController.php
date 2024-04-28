@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Conversations;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 
 use App\Models\User;
 use App\Models\Messages;
+use Carbon\Carbon;
 
 
 class ConversationsController extends Controller
@@ -18,16 +21,26 @@ class ConversationsController extends Controller
     public function index($id)
     {
 
-        //
-        $user = User::where('id', $id)->first();
-        // return response()->json(['user' => $user], 200);
+        $user = Auth::user();
+
+    
         $conversations = [];
         $userWithDetail = [];
         $getTheLastMessage = [];
-        if($user->role === "artist"){
+
+
+        if($id == $user->id){
+      
             
-                    $conversations = Conversations::where('participent_id', $id)
-                    ->get();
+            return response()->json(['message' => 'You cannot chat with yourself'], 400);
+        }
+
+        
+        if($user->role === "artist"){
+
+            $conversations = Conversations::where('participent_id', $id)
+            ->get();                    
+    
             
                     foreach ($conversations as $conversation) {
                         $user = User::where('id', $conversation->user_id)->first();
@@ -38,11 +51,33 @@ class ConversationsController extends Controller
                             'last_message' => $getTheLastMessage
                         ];
                     }
+
           
         }
         else{
-            $conversations = Conversations::where('user_id', $id)
+            $conversations = Conversations::where('user_id', $user->id)
             ->get();
+
+            $duplicateConversation = Conversations::where('user_id', $user->id)
+            ->where('participent_id', $id)
+            ->get();
+
+      
+
+            if(
+                count($duplicateConversation) === 0
+            ){
+
+                $conversation = Conversations::create(
+                    [
+                        'user_id' => $user->id,
+                        'participent_id' => $id
+                    
+                    ]
+                );
+
+    
+            }
         
         foreach ($conversations as $conversation) {
             $user = User::where('id', $conversation->participent_id)->first();
@@ -50,7 +85,8 @@ class ConversationsController extends Controller
             $userWithDetail[] = [
                 'conversation' => $conversation,
                 'detail' => $user,
-                'last_message' => $getTheLastMessage
+                'last_message' => $getTheLastMessage,
+                'messages' => null
             ];
         }
     }
@@ -63,10 +99,79 @@ class ConversationsController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function show()
     {
         //
+        //get all the conversations for the user 
+        $user = Auth::user();
+        $conversations = [];
+        $userProfile = [];
+        $userWithDetail = [];
+        $getTheLastMessage = [];
+        
+        //:TODO 
+        
+        if($user->role === 'artist'){
+            $conversations = Conversations::where('participent_id', $user->id)->get();
+            foreach ($conversations as $conversation) {
+               
+                $userProfile = User::where('id', $conversation->user_id)->first(); 
+                $getTheLastMessage = Messages::where('conversation_id', $conversation->id)->orderBy('created_at', 'desc')->first();
+                // $unRead = Messages::where('conversation_id', $conversation->id)->where('seen', 0)->count();
+                    $unRead = 0;
 
+
+                 //check if the unread message is from the user or the participent
+                //if the user is the participent then the unread message is from the user
+                if($user->id === $conversation->participent_id){
+                    $unRead = Messages::where('conversation_id', $conversation->id)->where('seen', 0)->where('user_id', $conversation->user_id)->count();
+                
+
+                }
+
+                //if the user is the user then the unread message is from the participent
+        
+            
+           
+                $userWithDetail[] = [
+                    'conversation' => $conversation,
+                    'detail' => $userProfile,
+                    'last_message' => $getTheLastMessage,
+                    'unread' => $unRead,
+                ];
+            }
+            return response()->json(['conversations' => $userWithDetail], 200);
+    
+
+        }
+        else{
+
+            $conversations = Conversations::where('user_id', $user->id)->get();
+            foreach ($conversations as $conversation) {
+              $userProfile = User::where('id', $conversation->participent_id)->first();
+                $getTheLastMessage = Messages::where('conversation_id', $conversation->id)->orderBy('created_at', 'desc')->first();
+                // $unRead = Messages::where('conversation_id', $conversation->id)->where('seen', 0)->count();
+                $unRead = 0;
+                //check if the unread message is from the user or the participent
+                //if the user is the participent then the unread message is from the user
+                if($user->id === $conversation->user_id){
+                    $unRead = Messages::where('conversation_id', $conversation->id)->where('seen', 0)->where('user_id', $conversation->participent_id)->count();
+                
+
+                }
+
+                //check if conversation created time is less than 1minutes
+                $userWithDetail[] = [
+                    'conversation' => $conversation,
+                    'detail' => $userProfile,
+                    'last_message' => $getTheLastMessage,
+                    'unread' => $unRead,
+                ];
+            }
+            return response()->json(['conversations' => $userWithDetail], 200);
+    
+        }
+       
     }
 
     /**
@@ -114,10 +219,7 @@ class ConversationsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Conversations $conversations)
-    {
-        //
-    }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -138,8 +240,14 @@ class ConversationsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Conversations $conversations)
+    public function destroy($id)
     {
         //
+
+        $conversation = Conversations::find($id);
+        
+        $conversation->delete();
+        return response()->json(['message' => 'Conversation deleted successfully'], 200);
+
     }
 }

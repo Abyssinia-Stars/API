@@ -170,7 +170,7 @@ class BalanceController extends Controller
 
             $balance->balance -= $amount;
             $balance->save();
-            return response()->json(['message' => 'Your withdrawal is successfull']);
+            return response()->json(['message' => 'Your withdrawal is successfull'],200);
         } else {
             Log::info("Payment failed");
         }

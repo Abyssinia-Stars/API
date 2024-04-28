@@ -33,6 +33,10 @@ Broadcast::channel('messages.{userId}', function ($user, $userId) {
     return (int) $user->id === (int) $userId;
     });
 
+    Broadcast::channel('messageseen.{userId}', function ($user, $userId) {
+        return (int) $user->id === (int) $userId;
+        }); 
+
     
 // Broadcast::channel('idverification', function ($user){
 //     return true;
