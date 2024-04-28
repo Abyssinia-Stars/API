@@ -118,6 +118,7 @@ try {
     broadcast(new VerifyIdEvent($notification));
 } catch (\Throwable $th) {
     //throw $th;
+    
 }
 
 

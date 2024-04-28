@@ -12,6 +12,10 @@ use Illuminate\Support\Str;
 
 use App\Models\MainTransaction;
 use App\Models\TxnHistory;
+use App\Models\User;
+use App\Models\Work;
+use App\Models\Notification;
+use App\Events\VerifyIDEvent;
 
 use App\Models\Balance;
 
@@ -28,20 +32,42 @@ class OfferController extends Controller
         return response()->json(['Offers' => $offers]);
     }
 
-    public function showOffersByClient()
+    public function showOffersByClient($id)
     {
         $client_id = Auth::user()->id;
 
-        $offers = Offer::where('client_id', $client_id)->get();
-        return response()->json(['Offers' => $offers]);
+        $offers = Offer::where('work_id', $id)->where(
+            'client_id',
+            $client_id
+        )->get();
+        $getAristProfile = [];
+        foreach ($offers as $offer) {
+            $artistProfile = User::where('id', $offer->artist_id)->first();
+            $getAristProfile[] = [
+                'offer' => $offer,
+                'artistProfile' => $artistProfile
+            ];
+        }
+
+        return response()->json(['Offers' => $getAristProfile]);
     }
 
     public function showOffersByArtist()
     {
         $artist_id = Auth::user()->id;
+        $ClientProfile = [];
 
         $offers = Offer::where('artist_id', $artist_id)->get();
-        return response()->json(['Offers' => $offers]);
+        foreach ($offers as $offer) {
+            $clientProfile = User::where('id', $offer->client_id)->first();
+            $job = Work::where('id', $offer->work_id)->first();
+            $ClientProfile[] = [
+                'offer' => $offer,
+                'job' => $job->title,
+                'clientProfile' => $clientProfile
+            ];
+        }
+        return response()->json(['Offers' => $ClientProfile]);
     }
 
 
@@ -93,8 +119,6 @@ class OfferController extends Controller
                 return response()->json(['message' => 'Insufficient Balance']);
             }
 
-
-
             $balance->balance = $balance->balance -  $request->price; 
             $balance->onhold_balance = $balance->onhold_balance +  $request->price;
             $balance->save();
@@ -116,8 +140,37 @@ class OfferController extends Controller
                 ]
             );
 
-    
-            return response()->json(['message' => 'Offer created successfully', 'Offer Details' => $offerDetails], 200);
+
+            //create a notification and triigger the verifyID Event 
+
+            $notification = Notification::create(
+                [
+                    'user_id' => $request->artist_id,
+                    'title' => 'New Offer',
+                    'source_id' => $client_id,
+                    'message' => 'You have a new offer',
+                    'type' => 'offer',
+                    'status' => 'unread',
+            
+                
+                ]
+            );
+
+            $notification->save();
+
+
+            event(new VerifyIDEvent($notification));
+
+
+
+
+
+
+
+
+
+
+            return response()->json(['message' => 'Offer created successfully', 'Offer Details' => $offerDetails]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error creating Offer Details: ' . $e->getMessage()], 500);
         }
@@ -200,7 +253,14 @@ class OfferController extends Controller
 
         $offer = Offer::where('id', $id)->where('artist_id', $artist_id)
         ->first();
+        $job = Work::where('id', $offer->work_id)->first();
+        $job->status = "started";
+        $job->save();
 
+    //     return response()->json(['message'=>$offer,
+    // 'artist' => $artist_id,
+    // 'id' => $id
+    // ], 200);
         $offer->status = $status;
 
         $offer->save();
@@ -220,6 +280,24 @@ $balance->balance = $newbalance;
             
         }
 
+        $notification = Notification::create(
+            [
+                'user_id' => $offer->client_id,
+                'title' => 'New Offer',
+                'source_id' => $artist_id,
+                'message' => 'Offer has been accepted',
+                'type' => 'offer',
+                'status' => 'unread',
+        
+            
+            ]
+        );
+
+        $notification->save();
+
+
+        event(new VerifyIDEvent($notification));
+
     
 
         return response()->json(['message'=>'offer accepted'], 200);
@@ -231,9 +309,10 @@ $balance->balance = $newbalance;
         public function jobIsOver($id){
             $client_id = Auth::user()->id;
     
-            $offer = Offer::where('id', $id)->where('client_id', $client_id)
+            $offer = Offer::where('work_id', $id)->where('client_id', $client_id)
             ->first();
-    
+     
+            $job = Work::where('id', $offer->work_id)->first();
             if($offer->status === "accepted"){
                 $clientBalance = Balance::where('user_id', $client_id)->first(); 
                 $artistBalance = Balance::where('user_id', $offer->artist_id)->first(); 
@@ -280,13 +359,38 @@ $balance->balance = $newbalance;
                         ]
                     );
 
+                    $job->status = "completed";
+                    $job->save();
+
+                    $offer->status = "completed";
+                    $offer->save();
+
+                    $notification = Notification::create(
+                        [
+                            'user_id' => $offer->artist_id,
+                            'title' => 'Payment For Job',
+                            'source_id' => $client_id,
+                            'message' => 'You Have Successfully Completed The Job',
+                            'type' => 'offer',
+                            'status' => 'unread',
+                    
+                        
+                        ]
+                    );
+        
+                    $notification->save();
+        
+        
+                    event(new VerifyIDEvent($notification));
+
+
                     return response()->json([
                         "message" => "success"
                     ],200);
             }
 
             return response()->json([
-                "error"=>"error"
+                "error"=> "Job Already Completed or not accepted"
             ],401);
     
         }

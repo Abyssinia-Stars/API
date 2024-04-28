@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Events\SendMessage;
+use App\Events\SendSeen;
 
 use App\Models\Conversations;
 use App\Models\User;
@@ -119,6 +120,32 @@ class MessagesController extends Controller
             $th->getMessage()
 
         ], 500);
+        }
+    }
+
+    public function update($messageid)
+    {
+        //
+  
+
+        try {
+
+            $message = Messages::where('id',$messageid)->first()->makeHidden(['created_at','updated_at','deleted_at']);
+            $message->seen = true;
+
+            $conversation = Conversations::where('id', $message->conversation_id)->first();
+
+    
+            $message->save();
+
+
+            broadcast(new SendSeen($conversation,$message));
+
+    
+
+            return response()->json([ 'message' => $message],200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error updating Message Details: ' . $e->getMessage()], 500);
         }
     }
 }

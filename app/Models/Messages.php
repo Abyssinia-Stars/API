@@ -16,6 +16,7 @@ class Messages extends Model
         'seen',
     ];
 
+   
     public function user()
     {
         return $this->belongsTo(User::class);

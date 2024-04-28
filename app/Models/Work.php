@@ -11,7 +11,7 @@ class Work extends Model
 
 
     protected $fillable = ['title','client_id', 'catagory', 'description', 'status', 'from_date','to_date'];
-
+    
 
 
     public function Users()

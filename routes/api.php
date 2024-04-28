@@ -79,7 +79,7 @@ Route::middleware('auth:api')->group(function () {
         Route::delete("reviews/{userId}", [CustomerController::class, 'removeReview']);
         Route::get("reviews", [CustomerController::class, 'getReviews']);
         Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
-    Route::get("/offers", [OfferController::class, "showOffersByClient"]);
+    Route::get("/offers/{id}", [OfferController::class, "showOffersByClient"]);
     Route::put("/jobs/{id}/completed", [OfferController::class, "jobIsOver"]);
 
     });
@@ -114,12 +114,15 @@ Route::middleware('auth:api')->group(function () {
     //conversations 
 
     Route::get('/conversations/{id}', [ConversationsController::class, 'index']);
+    Route::delete('/conversations/{id}', [ConversationsController::class, 'destroy']);
+    Route::get('/conversations', [ConversationsController::class, 'show']);
     Route::post('/conversations/messages/{participentId}', [ConversationsController::class, 'getConversationData']);
 
     //messages
 
     Route::get("/messages/{conversationId}", [MessagesController::class, 'index']);
     Route::post("message", [MessagesController::class, 'store']);
+    Route::put("/messages/{id}", [MessagesController::class, 'update']);
 
     
 });

@@ -125,7 +125,7 @@ public function getArtistByParams(Request $request){
     ->where(function ($query) use ($q) {
         $query->where('name', 'like', "%$q%")
             ->orWhere('email', 'like', "%$q%");
-    })
+    })->inRandomOrder()
     ->get();
 
   
