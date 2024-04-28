@@ -20,6 +20,7 @@ return new class extends Migration
             $table->json('youtube_links')->nullable();
             $table->json('attachments')->nullable();
             $table->string('price_rate')->nullable();
+            $table->string('offfer_point')->default(50);
 
 
             $table->timestamps();

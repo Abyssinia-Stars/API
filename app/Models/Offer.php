@@ -11,7 +11,7 @@ class Offer extends Model
 
 
 
-    protected $fillable = ['work_id','client_id','artist_id', 'status', 'price'];
+    protected $fillable = ['work_id','client_id','artist_id', 'status', 'price', 'offer_point_required'];
 
 
     public function Jobs()

@@ -17,6 +17,7 @@ class ArtistProfile extends Model
         'youtube_links',
         'attachments',
         'role',
+        'offfer_point',
         'price_rate'
     ];
 

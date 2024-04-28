@@ -113,7 +113,12 @@ $notification = new Notification([
 
 $notification->save();
 
-broadcast(new VerifyIdEvent($notification));
+try {
+    //code...
+    broadcast(new VerifyIdEvent($notification));
+} catch (\Throwable $th) {
+    //throw $th;
+}
 
 
 

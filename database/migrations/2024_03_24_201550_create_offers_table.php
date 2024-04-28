@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreign('artist_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('status');
             $table->float('price');
+            $table->integer('offer_point_required');
 
 
             $table->timestamps();

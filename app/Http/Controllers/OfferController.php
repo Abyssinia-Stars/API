@@ -83,9 +83,7 @@ class OfferController extends Controller
         if ($validation->fails()) {
             return response()->json(['error' => $validation->errors()], 401);
         }
-        
-        // $offer = Offer::create($request->all());
-        
+ 
         
         try {
             
@@ -96,33 +94,16 @@ class OfferController extends Controller
             }
 
 
-            // Create the ArtistProfile with the validated data
-            // $our_amount = $request->price * 0.1;
-
-            // $after_tax =   $our_amount * 0.35;
-
-            // $net_amount = $our_amount - $after_tax;
-
-            // $mainTransaction = MainTransaction::create(
-            //     [
-
-            //         'client_id' => $client_id,
-            //         'artist_id' => $request->artist_id,
-            //         'full_amount'=> $request->price,
-            //         'our_amount' => $our_amount,
-            //         'after_tax' => $after_tax,
-            //         'net_amount' => $net_amount,
-            //         'percentage' => 0.1,
-            //         "tax_percentage" => 0.35
-            //     ]
-            //     );
-
-                // $artist_amount = $request->price - $our_amount;
 
             $balance->balance = $balance->balance -  $request->price; 
             $balance->onhold_balance = $balance->onhold_balance +  $request->price;
             $balance->save();
+            $offerPointRequired = $request->price * 0.01;
             // $client_id = Auth::user()->id;
+            $artistProfile = ArtistProfile::where('user_id', $request->artist_id)->first();
+            if($artistProfile->offer_point < $offerPointRequired){
+                return response()->json(['message' => 'Artist does not have enough offer points'], 401);
+            }
             $offerDetails = Offer::create(
                 [
                     'work_id' => $request->work_id,
@@ -130,30 +111,13 @@ class OfferController extends Controller
                     'artist_id' => $request->artist_id,
                     'status' => "pending",
                     'price' => $request->price,
+                    'offer_point_required' => $offerPointRequired
 
                 ]
             );
 
-        // $uuid = $client_id . Str::uuid();
-
-        // $txn_detail = TxnHistory::create(
-        //     [
-        //         'tx_ref' =>  $uuid,
-        //         'amount' => $request->price,
-        //         'charge' => $our_amount,
-        //         'from' => $client_id,
-        //         'to' => $request->artist_id,
-        //         'reason' => 'Offer',
-        //         'type' => 'payment'
-        //     ]
-        // );
-
-
-
-
-
-
-            return response()->json(['message' => 'Offer created successfully', 'Offer Details' => $offerDetails]);
+    
+            return response()->json(['message' => 'Offer created successfully', 'Offer Details' => $offerDetails], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error creating Offer Details: ' . $e->getMessage()], 500);
         }
