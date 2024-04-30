@@ -28,6 +28,7 @@ use App\Events\SendNotificationTry;
 use  App\Events\TryMessage;
 use App\Jobs\SendNotification;
 use App\Jobs\HandleMessage;
+use App\Models\ArtistProfile;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,6 +45,17 @@ use App\Jobs\HandleMessage;
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/user/me', function () {
+        $user = Auth::user();
+        if($user->role == 'artist'){
+            $artistProfile = ArtistProfile::where('user_id', $user->id)->first();
+
+            if($artistProfile == null){
+                return $user;
+            }
+            $responseData = array_merge($user->toArray(), $artistProfile->toArray());
+            return response()->json($responseData);
+      
+        }
         return Auth::user();
     });
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
@@ -98,7 +110,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/txn-history', [TxnHistoryController::class, 'index']);
 
     // subscription
-    Route::post("/subscribe", [SubscriptionController::class, "subscribe"]);
+    Route::post("/subscribe/{id}", [SubscriptionController::class, "subscribe"]);
 
     Route::get("/artist/offers", [OfferController::class, "showOffersByArtist"]);
     Route::put("/artist/offers/{id}/{status}", [OfferController::class, "acceptOffer"]);

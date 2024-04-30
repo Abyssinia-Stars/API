@@ -15,6 +15,7 @@ use App\Models\TxnHistory;
 use App\Models\User;
 use App\Models\Work;
 use App\Models\Notification;
+use App\Models\ArtistProfile;
 use App\Events\VerifyIDEvent;
 
 use App\Models\Balance;
@@ -125,8 +126,8 @@ class OfferController extends Controller
             $offerPointRequired = $request->price * 0.01;
             // $client_id = Auth::user()->id;
             $artistProfile = ArtistProfile::where('user_id', $request->artist_id)->first();
-            if($artistProfile->offer_point < $offerPointRequired){
-                return response()->json(['message' => 'Artist does not have enough offer points'], 401);
+            if($artistProfile->offfer_point < $offerPointRequired){
+                return response()->json(['message' => 'Artist does not have enough offer points'], 400);
             }
             $offerDetails = Offer::create(
                 [
@@ -257,13 +258,14 @@ class OfferController extends Controller
         $job->status = "started";
         $job->save();
 
-    //     return response()->json(['message'=>$offer,
-    // 'artist' => $artist_id,
-    // 'id' => $id
-    // ], 200);
         $offer->status = $status;
 
         $offer->save();
+
+        $artistProfile = ArtistProfile::where('user_id', $artist_id)->first();
+ 
+        $artistProfile->offfer_point = $artistProfile->offfer_point - $offer->offer_point_required;
+        $artistProfile->save();
 
         if($status === "rejected"){
             $balance = Balance::where('user_id', $offer->client_id)->first();
@@ -295,8 +297,12 @@ $balance->balance = $newbalance;
 
         $notification->save();
 
-
-        event(new VerifyIDEvent($notification));
+        try {
+            //code...
+            event(new VerifyIDEvent($notification));
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
 
     
 

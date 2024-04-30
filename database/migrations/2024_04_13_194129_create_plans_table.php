@@ -14,7 +14,10 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->decimal('price', 10, 2);
-            $table->integer('duration'); // Duration in months
+            $table->integer('duration')->default(
+                1
+            
+            ); // Duration in months
             $table->timestamps();
         });
     }
