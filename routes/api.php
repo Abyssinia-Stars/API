@@ -25,9 +25,10 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ConversationsController;
 use App\Http\Controllers\MessagesController;
 use App\Events\SendNotificationTry;
-use  App\Events\TryMessage;
+use App\Events\TryMessage;
 use App\Jobs\SendNotification;
 use App\Jobs\HandleMessage;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -86,7 +87,7 @@ Route::middleware('auth:api')->group(function () {
 
     // payment
     Route::get('/payment-info/get', [PaymentInfoController::class, 'getPaymentInfo']);
-    Route::post('/payment-info', [PaymentInfoController::class,'store']);
+    Route::post('/payment-info', [PaymentInfoController::class, 'store']);
     Route::patch('/payment-info', [PaymentInfoController::class, 'update']);
     Route::delete('/payment-info', [PaymentInfoController::class, 'destroy']);
     Route::get('/txn-history', [TxnHistoryController::class, 'index']);
@@ -105,14 +106,12 @@ Route::middleware('auth:api')->group(function () {
 
 
     //notification
-
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/{id}', [NotificationController::class, 'show']);
     Route::put('/notifications/{id}/{status}', [NotificationController::class, 'update']);
 
 
-    //conversations 
-
+    //conversations
     Route::get('/conversations/{id}', [ConversationsController::class, 'index']);
     Route::delete('/conversations/{id}', [ConversationsController::class, 'destroy']);
     Route::get('/conversations', [ConversationsController::class, 'show']);
@@ -154,20 +153,20 @@ Route::controller(AuthController::class)->group(function () {
         Route::post("/{user}/set-verification-status", [AdminController::class, 'setVerificationStatus']);
         Route::post("/{user}/get", [AdminController::class, 'getUser']);
     });
-    
+
     Route::post('/register', 'registerUser')->name('auth.register');
     Route::post('/login', 'loginUser')->name('auth.login');
 });
 
-Route::get("/notification_try", function(){
+Route::get("/notification_try", function () {
     // broadcast(new SendNotificationTry());
     // SendNotification::dispatch();
     // HandleMessage::dispatch()
     broadcast(new TryMessage());
     return response()->json([
-        'a'=>'b'
+        'a' => 'b'
     ]);
-} );
+});
 
 
 

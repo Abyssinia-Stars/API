@@ -36,7 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'gender',
         'location',
         'backup_email',
-        
+
     ];
 
     /**
@@ -113,5 +113,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function balance()
     {
         return $this->hasOne(Balance::class);
+    }
+
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class);
     }
 }
