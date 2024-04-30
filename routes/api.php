@@ -28,6 +28,8 @@ use App\Events\SendNotificationTry;
 use App\Events\TryMessage;
 use App\Jobs\SendNotification;
 use App\Jobs\HandleMessage;
+use App\Models\ArtistProfile;
+use App\Models\Subscription;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -47,11 +49,16 @@ Route::middleware('auth:api')->group(function () {
         $user = Auth::user();
         if($user->role == 'artist'){
             $artistProfile = ArtistProfile::where('user_id', $user->id)->first();
+            $subscriptionPlan = Subscription::where('user_id', $user->id)->first();
 
+            
             if($artistProfile == null){
                 return $user;
             }
             $responseData = array_merge($user->toArray(), $artistProfile->toArray());
+            if($subscriptionPlan != null){
+                $responseData = array_merge($responseData, $subscriptionPlan->toArray());
+            }
             return response()->json($responseData);
       
         }
@@ -110,6 +117,7 @@ Route::middleware('auth:api')->group(function () {
 
     // subscription
     Route::post("/subscribe/{id}", [SubscriptionController::class, "subscribe"]);
+    Route::post("/buyOffer", [SubscriptionController::class, "buyOffer"]);
 
     Route::get("/artist/offers", [OfferController::class, "showOffersByArtist"]);
     Route::put("/artist/offers/{id}/{status}", [OfferController::class, "acceptOffer"]);

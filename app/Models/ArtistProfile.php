@@ -18,7 +18,9 @@ class ArtistProfile extends Model
         'attachments',
         'role',
         'offfer_point',
-        'price_rate'
+        'price_rate',
+        'is_subscribed',
+
     ];
 
     protected $casts = [
