@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PaymentInfo;
 use App\Models\Plans;
 use App\Models\Subscription;
-use Chapa\Chapa\Facades\Chapa as Chapa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -25,67 +23,29 @@ class SubscriptionController extends Controller
         }
 
         $plan = Plans::findOrFail($request->get('plan_id'));
-        return $this->initSubscription($plan);
-    }
-
-    private function initSubscription(Plans $plans)
-    {
-        $reference = Chapa::generateReference();
         $user = Auth::user();
-        $payment_info = PaymentInfo::where('user_id', $user->id)->firstOrFail();
+        $balance = $user->balance->balance;
+        Log::info($balance);
+        if ($balance < $plan->price) {
+            return response()->json(['error' => 'Insufficient balance'], 400);
+        }
+        $user->balance()->update([
+            'balance' => $balance - $plan->price,
+        ]);
 
-        if ($payment_info === null) {
-            return response()->json([
-                'message' => 'Please add payment information'
-            ], 400);
+        $prev_end_date = now();
+        if ($user->subscription) {
+            $prev_end_date = $user->subscription->ends_at;
         }
 
-        // Enter the details of the payment
-        $data = [
-            'amount' => $plans->price / 0.965, // 3.5% charge
-            'email' => $user->email,
-            'tx_ref' => $reference,
-            'currency' => $payment_info->currency,
-            'callback_url' => route('subscription_callback', [$reference, 'user_id' => $user->id, 'plan_id' => $plans->id]),
-            'first_name' => $payment_info->first_name,
-            'last_name' => $payment_info->last_name,
-            "customization" => [
-                "title" => 'Abysinia Stars',
-                "description" => "Where talents shine"
-            ]
-        ];
-
-        $payment = Chapa::initializePayment($data);
-
-        if ($payment['status'] !== 'success') {
-            return response()->json([
-                'message' => 'Something went really bad'
-            ], 500);
-        }
-
-        return $payment['data'];
-    }
-
-    public function callback($reference, Request $request)
-    {
-        Log::info("Recieved subscription request");
-        $data = Chapa::verifyTransaction($reference);
-        $user_id = $request->input('user_id');
-        $plan_id = $request->input('plan_id');
-        if ($data['status'] == 'success') {
-            $plan = Plans::findOrFail($request->get('plan_id'));
-            Subscription::updateOrCreate([
-                'user_id' => $user_id,
-                'plan_id' => $plan_id,
-                'starts_at' => now(),
-                'ends_at' => now()->addMonths($plan->duration),
-                'active' => true,
-            ]);
-
-            return response()->json(['error' => 'Successfully accepted payment']);
-        } else {
-            return response()->json(['error' => 'Payment faild'], 500);
-        }
+        $subs = $user->subscription->updateOrCreate([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'starts_at' => $prev_end_date,
+            'ends_at' => now()->addMonths($plan->duration),
+            'active' => true,
+        ]);
+        return $subs;
     }
 
     public function checkSubscriptionStatus()
