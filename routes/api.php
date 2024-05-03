@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\SubscriptionMiddleware;
+
 use App\Http\Controllers\PaymentInfoController;
 use App\Http\Controllers\PlansController;
 use App\Http\Controllers\SubscriptionController;
@@ -30,6 +32,9 @@ use App\Jobs\SendNotification;
 use App\Jobs\HandleMessage;
 use App\Models\ArtistProfile;
 use App\Models\Subscription;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -45,25 +50,7 @@ use App\Models\Subscription;
 
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/user/me', function () {
-        $user = Auth::user();
-        if($user->role == 'artist'){
-            $artistProfile = ArtistProfile::where('user_id', $user->id)->first();
-            $subscriptionPlan = Subscription::where('user_id', $user->id)->first();
-
-            
-            if($artistProfile == null){
-                return $user;
-            }
-            $responseData = array_merge($user->toArray(), $artistProfile->toArray());
-            if($subscriptionPlan != null){
-                $responseData = array_merge($responseData, $subscriptionPlan->toArray());
-            }
-            return response()->json($responseData);
-      
-        }
-        return Auth::user();
-    });
+    Route::get('user/me', [AuthController::class, 'me']);
     Route::post('/upload-id', [AuthController::class, 'uploadIdImage']);
     Route::apiResource('/events', EventController::class);
     Route::get('/artist/events', [EventController::class, 'showEventsByArtist']);
@@ -71,6 +58,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/profile', [UserProfileController::class, 'destroy']);
 
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
+    
     Route::prefix("notification/manager")->middleware('manager')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ManagerController::class, 'handleResponse']);
@@ -141,6 +129,18 @@ Route::middleware('auth:api')->group(function () {
     Route::post("message", [MessagesController::class, 'store']);
     Route::put("/messages/{id}", [MessagesController::class, 'update']);
 
+    //attachments
+
+    Route::delete("/attachments/{attachmentName}", [ArtistProfileController::class, 'deleteAttachment']);
+
+    //test subscription
+
+    Route::get("/premFeature", function () {
+        
+        return response()->json([
+            'message' => 'success'
+        ]); 
+    })->middleware(SubscriptionMiddleware::class);
     
 });
 
@@ -150,7 +150,7 @@ Route::post("/subscribe/callback/{reference}", [SubscriptionController::class, "
 Route::get("/callback/{reference}", [BalanceController::class, 'callback'])->name('callback');
 Route::get('/random-artists', [CustomerController::class, 'getRandomAritsts']);
 Route::get('/random-categories', [CustomerController::class, 'getRandomCategories']);
-Route::get('/popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);
+Route::get('/popular-artists', [CustomerController::class, 'getVerifiedArtists']);
 Route::get('/get-random-artists', [CustomerController::class, 'getRandomAritsts']);
 Route::get('/get-random-categories', [CustomerController::class, 'getRandomCategories']);
 Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);

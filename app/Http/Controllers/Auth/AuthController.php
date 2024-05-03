@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ArtistProfile;
 use Illuminate\Http\Request;
 use App\Models\User;
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use \Illuminate\Http;
@@ -15,6 +16,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Storage;
 use App\Events\VerifyIdEvent;
 use App\Models\Notification;
+use App\Models\Subscription;
+use Illuminate\Support\Facades\Log;
+
 
 
 
@@ -174,5 +178,28 @@ try {
 
         broadcast(new VerifyIdEvent($notification));
         return response()->json(['message' => 'ID image uploaded successfully', 'user' => $user]);
+    }
+
+    public function me(){
+        $user = Auth::user();
+        if ($user && $user->role == 'artist') {
+            $artistProfile = ArtistProfile::where('user_id', $user->id)->firstOrFail();
+            $subscriptionPlan = Subscription::where('user_id', $user->id)->first();
+            $subscriptionPlan->makeHidden('id');
+            $artistProfile->makeHidden('id');
+            Log::info($artistProfile);
+            $responseData = array_merge($user->toArray(), $artistProfile->toArray());
+            if ($subscriptionPlan) {
+                $responseData = array_merge($responseData, $subscriptionPlan->toArray());
+            }
+
+            Log::info($responseData);
+        
+            return response()->json($responseData);
+
+        }
+        
+        return response()->json($user);
+        
     }
 }

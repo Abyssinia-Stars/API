@@ -254,6 +254,14 @@ class OfferController extends Controller
 
         $offer = Offer::where('id', $id)->where('artist_id', $artist_id)
         ->first();
+        $artistProfile = ArtistProfile::where('user_id', $artist_id)->first();
+ 
+        if($artistProfile->offfer_point < $offer->offer_point_required){
+            return response()->json(['message' => 'You do not have enough offer points'], 400);
+        }
+        $artistProfile->offfer_point = $artistProfile->offfer_point - $offer->offer_point_required;
+        $artistProfile->save();
+
         $job = Work::where('id', $offer->work_id)->first();
         $job->status = "started";
         $job->save();
@@ -262,10 +270,6 @@ class OfferController extends Controller
 
         $offer->save();
 
-        $artistProfile = ArtistProfile::where('user_id', $artist_id)->first();
- 
-        $artistProfile->offfer_point = $artistProfile->offfer_point - $offer->offer_point_required;
-        $artistProfile->save();
 
         if($status === "rejected"){
             $balance = Balance::where('user_id', $offer->client_id)->first();
@@ -314,12 +318,13 @@ $balance->balance = $newbalance;
 
         public function jobIsOver($id){
             $client_id = Auth::user()->id;
-    
-            $offer = Offer::where('work_id', $id)->where('client_id', $client_id)
+            $offer = Offer::where('id', $id)->where('client_id', $client_id)
             ->first();
      
             $job = Work::where('id', $offer->work_id)->first();
+        
             if($offer->status === "accepted"){
+                
                 $clientBalance = Balance::where('user_id', $client_id)->first(); 
                 $artistBalance = Balance::where('user_id', $offer->artist_id)->first(); 
 

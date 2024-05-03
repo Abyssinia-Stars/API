@@ -4,6 +4,9 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Jobs\CheckSubscription;
+use App\Jobs\AddOfferPoints;
+use App\Jobs\SubscriptionReminder;
 
 class Kernel extends ConsoleKernel
 {
@@ -14,6 +17,9 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('otp:clean')->daily();
+        // $schedule->job(new CheckSubscription)->everyMinute()->withoutOverlapping();
+        $schedule->job(new AddOfferPoints)->everyMinute()->withoutOverlapping();
+        $schedule->job(new SubscriptionReminder)->everyMinute();
     }
 
     /**

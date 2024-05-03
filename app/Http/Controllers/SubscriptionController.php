@@ -26,6 +26,9 @@ class SubscriptionController extends Controller
            $userProfile = ArtistProfile::where('user_id', $user->id)->first();
            $userProfile->is_subscribed = false;
            $userProfile->save();
+           $subscription = Subscription::where('user_id', $user->id)->first();
+           $subscription->starts_at = now();
+              $subscription->ends_at = now()->addMonths(1);
             return response()->json(['message' => 'Subscription cancelled']);
 
         }

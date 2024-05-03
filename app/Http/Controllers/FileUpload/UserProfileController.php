@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
@@ -46,9 +47,7 @@ class UserProfileController extends Controller
     public function update(Request $request)
     {
      
-        $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-        
-        $out->writeln("i am here");
+       
         
         $validateData = Validator::make($request->all(), [
             'name' => "string|max:255",
@@ -56,7 +55,12 @@ class UserProfileController extends Controller
             'old_password' => "string|max:255",
             "confirm_password" => "string|max:255",
             "backup_email" => "email|max:255",
+            'attachments' => 'array|min:1|max:5',
+            'attachments.*' => 'file|max:20000',
             'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Adjust the validation rules as needed
+            'location' => 'string|max:255',
+            "gender" => "string|max:255",
+            'price_rate' => 'string|max:255',
         ]);
 
         if ($validateData->fails()) {
@@ -65,8 +69,42 @@ class UserProfileController extends Controller
         
 
         $id = Auth::user()->id;
-        // return response()->json(['message' => $id],200);
+        // return response()->json(['message' => $request->backup_email],200);
     
+        //add attachments path to the array 
+
+
+
+
+        $attachmentPaths = [];
+        if ($request->hasFile('attachments')) {
+        
+            $artistProfile = ArtistProfile::where('user_id', $id)->first();
+
+        
+          
+            if($artistProfile->is_subscribed == false){
+                
+                if(count($artistProfile->attachments) > 5){
+                    return response()->json(['message' => 'You can only upload a maximum of 5 attachments'],401);
+                }
+               
+            }
+            foreach ($request->file('attachments') as $attachment) {
+                $attachmentPath = Storage::url($attachment->store('public/attachments'));
+                $attachmentPaths[] = $attachmentPath;
+            }
+
+            
+            $artistProfile->attachments = array_merge($artistProfile->attachments , $attachmentPaths);
+
+          
+    
+    
+          
+            $artistProfile->save();
+        }
+
         // Handle the image upload
         if ($request->hasFile('image')) {
             $profilePicturePath = Storage::url($request->file('image')->store('public/profile_pictures'));
@@ -80,6 +118,23 @@ class UserProfileController extends Controller
             $user = User::find($id);
             $user->name = $request->name;
             $user->save();
+        }
+
+        if($request->has('location')){
+            $artistProfile = ArtistProfile::where('user_id', $id)->first();
+            $artistProfile->location = $request->location;
+            $artistProfile->save();
+        }
+
+        if($request->has('gender')){
+            $artistProfile = ArtistProfile::where('user_id', $id)->first();
+            $artistProfile->gender = $request->gender;
+            $artistProfile->save();
+        }
+        if($request->has('price_rate')){
+            $artistProfile = ArtistProfile::where('user_id', $id)->first();
+            $artistProfile->price_rate = $request->price_rate;
+            $artistProfile->save();
         }
 
         if($request->has('password')){
@@ -129,7 +184,7 @@ class UserProfileController extends Controller
             }
             
             try{
-                $attachments = ArtistProfile::where('user_id', $id)->first()->attachments;  $attachments = ArtistProfile::where('user_id', $id)->first()->attachments;
+                $attachments = ArtistProfile::where('user_id', $id)->first()->attachments; 
                 if($attachments == null){
                     return response()->json(['message' => 'Profile deleted successfully'],200);
                 }

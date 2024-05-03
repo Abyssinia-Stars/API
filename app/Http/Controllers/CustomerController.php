@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\Favorites;
 use App\Models\Review;
 use App\Models\ArtistProfile;
+use App\Models\Offer;
+
 
 
 use Illuminate\Support\Facades\Validator;
@@ -17,6 +19,7 @@ class CustomerController extends Controller
     //
     public function getRandomAritsts(){
         $artists = User::where('role', 'artist')->inRandomOrder()->limit(10)->get();
+        $artistProfiles = ArtistProfile::whereIn('user_id', $artists->pluck('id'))->get();
         $artistsWithRating = [];
 
         foreach($artists as $artist){
@@ -25,6 +28,7 @@ class CustomerController extends Controller
         
                 $artistsWithRating[] = [
                     'artist' => $artist,
+                    'profile' => $artistProfiles->firstWhere('user_id', $artist->id),
                     'rating' => $averageRating
                 ];
             }
@@ -266,15 +270,23 @@ $results = collect($results)->forPage($page, $limit)->values();
                 'errors' => $validate->errors()
             ], 400);
         }   
-    $artist = User::where('id', $userId)->where('role', 'artist')->first();
+    $offer = Offer::where('id', $userId)->first();
+    if(!$offer){
+        return response()->json([
+            'message' => 'Offer not found'
+        ], 404);
+    }
+
+
     
-    if(!$artist){
+    if(!$offer->artist_id){
         return response()->json([
             'message' => 'user not found or not an artist'
         ], 404);}
 
 
-        $reviewAlreadyExists = Review::where('user_id', auth()->id())->where('artist_id', $artist->id)->first();
+        $reviewAlreadyExists = Review::where('user_id', auth()->id())->where('artist_id', $offer->artist_id)->where('work_id', $offer->work_id)
+        ->first();
         if($reviewAlreadyExists){
             return response()->json([
                 'message' => 'Review already exists'
@@ -284,7 +296,8 @@ $results = collect($results)->forPage($page, $limit)->values();
 
             $review = Review::create([
                 'user_id' => auth()->id(),
-                'artist_id' => $artist->id,
+                'artist_id' => $offer->artist_id,
+                'work_id' => $offer->work_id,
                 'rating' => $request->rating,
                 'review' => $request->review,
                 'description' => $request->description
@@ -333,6 +346,33 @@ $results = collect($results)->forPage($page, $limit)->values();
                 'error' => $th->getMessage()
             ], 500);
         }
+
+    }
+
+    public function getVerifiedArtists(){
+        
+        $artistProfiles = ArtistProfile::where('is_subscribed', true)->inRandomOrder()->get();
+     
+        $artists = User::whereIn('id', $artistProfiles->pluck('user_id'))->get();
+        $artistsWithRating = [];
+
+        foreach($artists as $artist){
+           
+            $averageRating = $this->calculateAverageRating($artist);
+            if($artistProfiles->firstWhere('user_id', $artist->id) == null){
+                continue;
+            }
+
+            $artistsWithRating[] = [
+                'artist' => $artist,
+                'rating' => $averageRating,
+                'profile' => $artistProfiles->firstWhere('user_id', $artist->id),
+            ];
+        }
+
+        return response()->json([
+            'artists' => $artistsWithRating
+        ]);
 
     }
 

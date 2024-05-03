@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Models\Notification;
 use App\Models\Review;
 use App\Models\Favorites;
+use App\Models\Offer;
+use App\Models\Work;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -88,6 +91,10 @@ class ArtistProfileController extends Controller
             'youtube_links' => 'required|array',
             'attachments' => 'array|min:1|max:5',
             'attachments.*' => 'file|max:20000', // 200 MB
+            'location' => 'string|max:255',
+            'gender' => 'string|max:255',
+            'price_rate' => 'string|max:255',
+
         ]);
 
         if ($validation->fails()) {
@@ -115,7 +122,10 @@ class ArtistProfileController extends Controller
                     'bio' => $validatedData['bio'],
                     'category' => $validatedData['category'],
                     'youtube_links' => $validatedData['youtube_links'],
-                    'attachments' => $attachmentPaths
+                    'attachments' => $attachmentPaths,
+                    'location' =>  'N/A',
+                    'gender'=>  'N/A',
+                    'price_rate' => 'N/A',
                 ]
             );
             // Update the user's profile picture if provided in the request
@@ -177,6 +187,33 @@ class ArtistProfileController extends Controller
        
         $artist = ArtistProfile::where('user_id', $id)->first();
         $userProfile  = User::where('id', $id)->first();
+        $completedOffers = Offer::where('artist_id', $id)->where('status', 'completed')->orWhere('status', 'accepted')->get()
+        ->makeHidden([
+            'created_at', 'updated_at', 'artist_id', 'client_id', 'offer_point_required', 'work_id'
+        ]);
+
+        
+       
+        $offersWithJobTitle = [];
+
+        if(count($completedOffers) > 0){
+            
+            foreach($completedOffers as $offer){
+                $job = array_merge($offer->toArray(), ['job_description' => Work::where('id', $offer->work_id)->first(['title','catagory','description','from_date','to_date'])
+                ->toArray()]);
+                $review = Review::where('work_id', $offer->work_id)->first();
+                if($review){
+                    $job = array_merge($job, ['review' => $review->toArray()]);
+                }
+                if($job){
+                    $offersWithJobTitle[] = $job;
+                }
+            }
+          
+    
+        }
+    
+
         $reviews= Review::where('artist_id', $id)->get();
         $averageRating = $this->calculateAverageRating($reviews);
 
@@ -196,6 +233,7 @@ class ArtistProfileController extends Controller
                 'profile_picture' => $userProfile->profile_picture,
                 'reviews' => $reviews,
                 'average_rating' => $averageRating,
+               
             ]);
         }
 
@@ -211,6 +249,7 @@ class ArtistProfileController extends Controller
             'profile_picture' => $userProfile->profile_picture,
             'reviews' => $reviews,
             'average_rating' => $averageRating,
+            'completed_offers' => $offersWithJobTitle
 
                 // Add other user columns as needed
         ]);
@@ -388,5 +427,51 @@ class ArtistProfileController extends Controller
     public function destroy(ArtistProfile $artistProfile)
     {
         //
+    }
+
+    public function deleteAttachment($attachmentName)
+    {
+        $id = Auth::user()->id;
+        try{
+            $attachments = ArtistProfile::where('user_id', $id)->first()->attachments;  
+            if($attachments == null){
+                return response()->json(['message' => 'No Attachment Found'],400);
+            }
+        
+            // $attachments = explode(',', $attachments);
+
+            foreach($attachments as $attachment){
+        
+                $attachment = explode('/', $attachment);
+                $attachment = end($attachment);
+                Log::info($attachment);
+
+                if($attachment == $attachmentName){
+                    
+        
+                    $attachments = array_diff($attachments, ["/storage/attachments/".$attachment]);
+                    $artistProfile = ArtistProfile::where('user_id', $id)->first();
+                
+                    $new_attachment=[];
+                    foreach($attachments as $attachment){
+                       array_push($new_attachment, $attachment);
+
+                    }
+                  
+                    
+                    $artistProfile->attachments = $new_attachment;
+                    $artistProfile->save();
+                    
+                    Storage::delete('public/attachments/'.$attachmentName); 
+
+                    return response()->json(['message' => 'Attachment deleted successfully'],200);
+                }
+            
+            }
+
+        }catch(\Exception $e){
+            return response()->json(['message' => $e],500);
+        }
+
     }
 }

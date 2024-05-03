@@ -23,8 +23,7 @@ return new class extends Migration {
             $table->enum('role', ['artist', 'manager', 'customer', 'admin']);
             $table->string('id_image')->nullable();
             $table->boolean('is_verified')->default(false);
-            $table->string('location')->nullable();
-            $table->string('gender')->nullable();
+      
             $table->rememberToken();
             $table->timestamps();
         });

@@ -27,9 +27,9 @@ class AppServiceProvider extends ServiceProvider
         User::created(function ($user) {
             // Create a balance record for the user
             $user->balance()->create(['balance' => 0, 'user_id' => $user->id, 'onhold_balance' => 0]);
-            // free trail
+           
             if ($user->role == 'artist' || $user->role == 'manager') {
-                $free_trail = Plans::where('type', 'free_trail')->where('role', $user->role)->first();
+                $free_trail = Plans::where('name', 'free')->first();
                 Log::info($free_trail->id);
                 $user->subscription()->create([
                     'user_id' => $user->id,

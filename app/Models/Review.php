@@ -12,6 +12,7 @@ class Review extends Model
     protected $fillable = [
         'user_id',
         'artist_id',
+        'work_id',
         'rating',
         'review',
         'description'
@@ -25,4 +26,5 @@ class Review extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
 }
