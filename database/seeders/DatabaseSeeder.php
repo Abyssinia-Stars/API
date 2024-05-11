@@ -6,6 +6,7 @@ namespace Database\Seeders;
 use App\Models\ArtistProfile;
 use App\Models\Plans;
 use App\Models\User;
+use App\Models\Manager;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -25,5 +26,6 @@ class DatabaseSeeder extends Seeder
         }
         User::factory(10)->create();
         ArtistProfile::factory(15)->create();
+        // Manager::factory(2)->create();S
     }
 }

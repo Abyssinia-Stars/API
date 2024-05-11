@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Events\VerifyIdEvent;
 use App\Models\Notification;
 use App\Models\Subscription;
+use App\Models\Manager;
 use Illuminate\Support\Facades\Log;
 
 
@@ -185,12 +186,20 @@ try {
         if ($user && $user->role == 'artist') {
             $artistProfile = ArtistProfile::where('user_id', $user->id)->firstOrFail();
             $subscriptionPlan = Subscription::where('user_id', $user->id)->first();
+
             $subscriptionPlan->makeHidden('id');
             $artistProfile->makeHidden('id');
             Log::info($artistProfile);
             $responseData = array_merge($user->toArray(), $artistProfile->toArray());
             if ($subscriptionPlan) {
                 $responseData = array_merge($responseData, $subscriptionPlan->toArray());
+            }
+            if($artistProfile->manager_id !== null){
+                $manager = User::where('id', $artistProfile->manager_id)->first();
+                $manager->makeHidden('id');
+
+                $responseData = array_merge($responseData, ["manager" => $manager]);
+            
             }
 
             Log::info($responseData);

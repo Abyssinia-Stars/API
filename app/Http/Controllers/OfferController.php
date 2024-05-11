@@ -58,6 +58,11 @@ class OfferController extends Controller
         $artist_id = Auth::user()->id;
         $ClientProfile = [];
 
+        $artistProfile = ArtistProfile::where('user_id', $artist_id)->first();
+        // if($artistProfile->manager_id !== null){
+        //     return response()->json(['message' => 'You can not access offers! Please contact manager'], 400);
+        // }
+
         $offers = Offer::where('artist_id', $artist_id)->get();
         foreach ($offers as $offer) {
             $clientProfile = User::where('id', $offer->client_id)->first();
@@ -70,7 +75,28 @@ class OfferController extends Controller
         }
         return response()->json(['Offers' => $ClientProfile]);
     }
+    
+    public function showOffersByManager(){
+        $manager_id = Auth::user()->id;
+        $ClientProfile = [];
 
+        $artistProfiles = ArtistProfile::where('manager_id', $manager_id)->get();
+        foreach($artistProfiles as $artistProfile){
+            $offers = Offer::where('artist_id', $artistProfile->user_id)->get();
+            foreach ($offers as $offer) {
+                Log::info($offer);
+                $clientProfile = User::where('id', $offer->client_id)->first();
+                $job = Work::where('id', $offer->work_id)->first();
+                $ClientProfile[] = [
+                    'offer' => $offer,
+                    'job' => $job->title,
+                    'clientProfile' => $clientProfile
+                ];
+            }
+        }
+        return response()->json(['offers' => $ClientProfile]);
+
+    }
 
     public function index()
     {
@@ -113,7 +139,7 @@ class OfferController extends Controller
  
         
         try {
-            
+           
             $balance = Balance::where('user_id', $client_id)->first();
             // Log::info($balance);
             if($balance->balance < $request->price ){
@@ -126,50 +152,86 @@ class OfferController extends Controller
             $offerPointRequired = $request->price * 0.01;
             // $client_id = Auth::user()->id;
             $artistProfile = ArtistProfile::where('user_id', $request->artist_id)->first();
-            if($artistProfile->offfer_point < $offerPointRequired){
-                return response()->json(['message' => 'Artist does not have enough offer points'], 400);
-            }
-            $offerDetails = Offer::create(
-                [
-                    'work_id' => $request->work_id,
-                    'client_id' => $client_id,
-                    'artist_id' => $request->artist_id,
-                    'status' => "pending",
-                    'price' => $request->price,
-                    'offer_point_required' => $offerPointRequired
-
-                ]
-            );
-
-
-            //create a notification and triigger the verifyID Event 
-
-            $notification = Notification::create(
-                [
-                    'user_id' => $request->artist_id,
-                    'title' => 'New Offer',
-                    'source_id' => $client_id,
-                    'message' => 'You have a new offer',
-                    'type' => 'offer',
-                    'status' => 'unread',
-            
+           
+                if($artistProfile->offfer_point < $offerPointRequired){
+                    return response()->json(['message' => 'Artist does not have enough offer points'], 400);
+                }
+                $offerDetails = Offer::create(
+                    [
+                        'work_id' => $request->work_id,
+                        'client_id' => $client_id,
+                        'artist_id' => $request->artist_id,
+                        'status' => "pending",
+                        'price' => $request->price,
+                        'offer_point_required' => $offerPointRequired
+    
+                    ]
+                );
+    
+    
+                //create a notification and triigger the verifyID Event 
+    
+                $notification = Notification::create(
+                    [
+                        'user_id' => $request->artist_id,
+                        'title' => 'New Offer',
+                        'source_id' => $client_id,
+                        'message' => 'You have a new offer',
+                        'type' => 'offer',
+                        'status' => 'unread',
                 
-                ]
-            );
+                    
+                    ]
+                );
+    
+                $notification->save();
+    
+    
+                event(new VerifyIDEvent($notification));
+            
 
-            $notification->save();
+            // else{
+            //     $manager_id = $artistProfile->manager_id;
+            //     // $managerProfile = User::where('id', $manager_id)->first();
+            //     // if($managerProfile->offfer_point < $offerPointRequired){
+            //     //     return response()->json(['message' => 'Manager does not have enough offer points'], 400);
+            //     // }
+            //     $offerDetails = Offer::create(
+            //         [
+            //             'work_id' => $request->work_id,
+            //             'client_id' => $client_id,
+            //             'artist_id' => $manager_id,
+            //             'status' => "pending",
+            //             'price' => $request->price,
+            //             'offer_point_required' => $offerPointRequired
+    
+            //         ]
+            //     );
+    
+    
+            //     //create a notification and triigger the verifyID Event 
+    
+            //     $notification = Notification::create(
+            //         [
+            //             'user_id' => $manager_id,
+            //             'title' => 'New Offer',
+            //             'source_id' => $client_id,
+            //             'message' => 'You have a new offer',
+            //             'type' => 'offer',
+            //             'status' => 'unread',
+                
+                    
+            //         ]
+            //     );
+    
+            //     $notification->save();
+    
+    
+            //     event(new VerifyIDEvent($notification));
 
 
-            event(new VerifyIDEvent($notification));
-
-
-
-
-
-
-
-
-
+            // }
+        
 
             return response()->json(['message' => 'Offer created successfully', 'Offer Details' => $offerDetails]);
         } catch (\Exception $e) {

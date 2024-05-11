@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\Models\User;
+use App\Models\ArtistProfile;
+use App\Models\Offer;
+
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 class ManagerController extends Controller
 {
     //
@@ -78,6 +82,34 @@ class ManagerController extends Controller
     public function getNotifications(){
         $notifications = Notification::where('user_id', auth()->user()->id())->get();
         return response()->json($notifications);
+    }
+
+    public function removeManager($id){
+
+        $artist = Auth::user()->id;
+        $artistProfile = ArtistProfile::where('user_id', $artist)->first();
+        $offers = Offer::where('artist_id', $artist)->get();
+        $offersCount = Offer::where('artist_id', $artist)->count();
+        $areAllOffersCompleted = true;
+        foreach($offers as $offer){
+
+        if($offer->status === "accepted" || $offer->status === "pending"){
+            $areAllOffersCompleted = false;
+            break;
+        }
+     
+    }
+    if($areAllOffersCompleted){
+        if($artistProfile->manager_id){
+            $artistProfile->manager_id = null;
+            $artistProfile->save();
+            return response()->json(['message' => 'Manager removed successfully'], 200);
+        }}
+        else {
+            return response()->json(['message' => "You can't remove manager! You have pending offers, Please Contact your Manager!"], 400);
+        }
+
+     
     }
 
 }

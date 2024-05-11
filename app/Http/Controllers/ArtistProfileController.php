@@ -249,7 +249,8 @@ class ArtistProfileController extends Controller
             'profile_picture' => $userProfile->profile_picture,
             'reviews' => $reviews,
             'average_rating' => $averageRating,
-            'completed_offers' => $offersWithJobTitle
+            'completed_offers' => $offersWithJobTitle,
+            'manager_id' => $artist->manager_id
 
                 // Add other user columns as needed
         ]);

@@ -20,6 +20,7 @@ class ArtistProfile extends Model
         'offfer_point',
         'price_rate',
         'is_subscribed',
+        'manager_id'
 
     ];
 
@@ -39,4 +40,10 @@ class ArtistProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
 }
