@@ -16,6 +16,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Storage;
 use App\Events\VerifyIdEvent;
 use App\Models\Notification;
+use App\Models\Offer;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\Log;
 
@@ -187,11 +188,15 @@ try {
             $subscriptionPlan = Subscription::where('user_id', $user->id)->first();
             $subscriptionPlan->makeHidden('id');
             $artistProfile->makeHidden('id');
-            Log::info($artistProfile);
+            $totalOffers = Offer::where('artist_id', $user->id)->count();
+            $completedOffers = Offer::where('artist_id', $user->id)->where('status', 'completed')->orWhere('status', 'accepted')->count();
+    
+            Log::info($totalOffers);
             $responseData = array_merge($user->toArray(), $artistProfile->toArray());
             if ($subscriptionPlan) {
                 $responseData = array_merge($responseData, $subscriptionPlan->toArray());
             }
+            $responseData = array_merge($responseData, ['total_offers' => $totalOffers, 'completed_offers' => $completedOffers]);
 
             Log::info($responseData);
         
