@@ -18,6 +18,10 @@ use App\Events\VerifyIdEvent;
 use App\Models\Notification;
 use App\Models\Subscription;
 use App\Models\Manager;
+use App\Models\Offer;
+use App\Models\Work;
+
+
 use Illuminate\Support\Facades\Log;
 
 
@@ -188,12 +192,15 @@ try {
             $subscriptionPlan = Subscription::where('user_id', $user->id)->first();
 
             $subscriptionPlan->makeHidden('id');
-            $artistProfile->makeHidden('id');
-            Log::info($artistProfile);
+            $artistProfile->makeHidden('id'); $totalOffers = Offer::where('artist_id', $user->id)->count();
+            $completedOffers = Offer::where('artist_id', $user->id)->where('status', 'completed')->orWhere('status', 'accepted')->count();
+
+            
             $responseData = array_merge($user->toArray(), $artistProfile->toArray());
             if ($subscriptionPlan) {
                 $responseData = array_merge($responseData, $subscriptionPlan->toArray());
             }
+            $responseData = array_merge($responseData, ['total_offers' => $totalOffers, 'completed_offers' => $completedOffers]);
             if($artistProfile->manager_id !== null){
                 $manager = User::where('id', $artistProfile->manager_id)->first();
                 $manager->makeHidden('id');
@@ -202,7 +209,7 @@ try {
             
             }
 
-            Log::info($responseData);
+           
         
             return response()->json($responseData);
 

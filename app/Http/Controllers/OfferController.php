@@ -59,9 +59,9 @@ class OfferController extends Controller
         $ClientProfile = [];
 
         $artistProfile = ArtistProfile::where('user_id', $artist_id)->first();
-        // if($artistProfile->manager_id !== null){
-        //     return response()->json(['message' => 'You can not access offers! Please contact manager'], 400);
-        // }
+        if($artistProfile->manager_id !== null){
+            return response()->json(['message' => 'You can not access offers! Please contact manager'], 400);
+        }
 
         $offers = Offer::where('artist_id', $artist_id)->get();
         foreach ($offers as $offer) {
