@@ -107,6 +107,10 @@ class AuthController extends Controller
                 $profile = ArtistProfile::where("user_id", $user->id)->first();
             }
 
+            if ($user->role === "manager") {
+                $profile = Manager::where("user_id", $user->id)->first();
+            }
+
             if ($user->hasVerifiedEmail()) {
                 $accessToken = $user->createToken('authToken')->accessToken;
 
@@ -191,7 +195,10 @@ try {
             $artistProfile = ArtistProfile::where('user_id', $user->id)->firstOrFail();
             $subscriptionPlan = Subscription::where('user_id', $user->id)->first();
 
-            $subscriptionPlan->makeHidden('id');
+            if($subscriptionPlan){
+
+                $subscriptionPlan->makeHidden('id');
+            }
             $artistProfile->makeHidden('id'); $totalOffers = Offer::where('artist_id', $user->id)->count();
             $completedOffers = Offer::where('artist_id', $user->id)->where('status', 'completed')->orWhere('status', 'accepted')->count();
 

@@ -9,14 +9,64 @@ use App\Models\Manager;
 use App\Models\ArtistProfile;
 use App\Models\Offer;
 
+
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Events\RequestEvent;
+use Illuminate\Support\Facades\Storage;
+
 
 class ManagerController extends Controller
 {
     //
 
+    public function store(Request $request)
+    {
+
+        $validation = Validator::make($request->all(), [
+            'profile_picture' => 'image',
+            'bio' => 'string|max:255',
+            'location' => 'string|max:255',
+            'gender' => 'string|max:255',
+        
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json(['error' => $validation->errors()], 400);
+        }
+        $validatedData = $request->all();
+
+        // Upload the cover picture
+        $profilePicturePath = Storage::url($request->file('profile_picture')->store('public/profile_pictures'));
+
+        // Upload the attachments
+ 
+        try {
+            $user = Auth::user(); 
+            // Create the ArtistProfile with the validated data
+            $artistProfile = Manager::create(
+                [
+                    'user_id' => $user->id,
+                    'bio' => $validatedData['bio'],
+                    'location' =>  $validatedData['location'],
+                    'gender'=>  $validatedData['gender'],
+                    'is_subscribed' => 0
+                ]
+            );
+            // Update the user's profile picture if provided in the request
+            if (isset($validatedData['profile_picture'])) {
+                $user->profile_picture = $profilePicturePath;
+                $user->save();
+                // return response()->json(['message' => 'Profile picture updated successfully']);
+            }
+            // Optionally, associate the user with the artist profile here
+            // For example, $artistProfile->user_id = $user->id;
+            // $artistProfile->save();
+            return response()->json(['message' => 'Manager profile created successfully', 'manager_profile' => $artistProfile]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error creating manager profile: ' . $e->getMessage()], 500);
+        }
+    }
     public function sendRequest($userId)
     {
       

@@ -32,6 +32,12 @@ class SubscriptionController extends Controller
             return response()->json(['message' => 'Subscription cancelled']);
 
         }
+
+        if($id == "downgrade"){
+            $managerProfile = Manager::where('user_id', $user->id)->first();
+            $managerProfile->is_subscribed = false;
+            $managerProfile->save();
+        }
      
         $plan = Plans::findOrFail($id);
      
@@ -154,5 +160,12 @@ class SubscriptionController extends Controller
             ->firstOrFail();
 
         return $subscription;
+    }
+    public function managerSubscription($number_of_people){
+        $plan = Plans::where("number_of_people", $number_of_people);
+        return $plan;
+        return $this->initSubscription($plan);
+
+
     }
 }

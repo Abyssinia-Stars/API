@@ -105,7 +105,9 @@ Route::middleware('auth:api')->group(function () {
 
     // subscription
     Route::post("/subscribe/{id}", [SubscriptionController::class, "subscribe"]);
+    Route::post("/subscribe/manager/{number_of_people}", [SubscriptionController::class, "managerSubscription"]);
     Route::post("/buyOffer", [SubscriptionController::class, "buyOffer"]);
+
 
     Route::get("/artist/offers", [OfferController::class, "showOffersByArtist"]);
     Route::put("/artist/offers/{id}/{status}", [OfferController::class, "acceptOffer"]);
@@ -115,11 +117,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/manager/offers', [OfferController::class, 'showOffersByManager']);
     Route::delete("/manager/remove/{id}", [ManagerController::class , "removeManager"]);
     Route::get('/manager/profile/{id}', [ManagerController::class, 'getManagerProfile']);
+    Route::post("/manager", [ManagerController::class, "store"]);
     
     //notification
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/{id}', [NotificationController::class, 'show']);
     Route::put('/notifications/{id}/{status}', [NotificationController::class, 'update']);
+
 
 
     //conversations
