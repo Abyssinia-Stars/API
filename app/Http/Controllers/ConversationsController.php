@@ -118,10 +118,13 @@ class ConversationsController extends Controller
         
         //:TODO 
         
-        if($user->role === 'artist'){
-            $artistProfile = ArtistProfile::where('user_id', $user->id)->first();
-            if($artistProfile->manager_id){
-                return response()->json(['message' => 'You are not allowed to view this page'], 400);
+        if($user->role === 'artist' || $user->role==="manager"){
+            if($user->role === "artist"){
+
+                $artistProfile = ArtistProfile::where('user_id', $user->id)->first();
+                if($artistProfile->manager_id){
+                    return response()->json(['message' => 'You are not allowed to view this page'], 400);
+                }
             }
             $conversations = Conversations::where('participent_id', $user->id)->get();
             foreach ($conversations as $conversation) {

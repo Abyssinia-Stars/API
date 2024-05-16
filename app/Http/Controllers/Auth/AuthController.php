@@ -177,7 +177,7 @@ try {
 
         $notification = new Notification([
             'user_id' => 1,
-            'notification_type' => 'request',
+            'notification_type' => 'system',
             'source_id' => $user->id,
             'title' => "ID Verification",
             'message' => $user->name . ' wants to verify ID',
@@ -221,6 +221,55 @@ try {
             return response()->json($responseData);
 
         }
+        
+        if ($user && $user->role == 'manager') {
+            $managerProfile = Manager::where('user_id', $user->id)->first();
+            $subscriptionPlan = Subscription::where('user_id', $user->id)->first();
+
+            if($subscriptionPlan){
+
+                $subscriptionPlan->makeHidden('id');
+            }
+            $managerProfile->makeHidden('id'); 
+           
+
+            
+            $responseData = array_merge($user->toArray(), $managerProfile->toArray());
+            if ($subscriptionPlan) {
+                $responseData = array_merge($responseData, $subscriptionPlan->toArray());
+            }
+            
+            $artistsManagedByManager = ArtistProfile::where('manager_id', $user->id)->get("user_id","name");
+            $artistProfile = [];
+            foreach($artistsManagedByManager as $artist){
+                $artistProfile[] = User::where('id', $artist->user_id)->get(["name","profile_picture","id","email","user_name"])->first();
+                
+            }
+            $responseData = array_merge($responseData, ['artists_managed' => $artistProfile]);
+
+           
+        
+            return response()->json($responseData);
+
+        }
+        
+        if ($user && $user->role == 'customer') {
+           
+        
+           
+            $jobProfile = Work::where('client_id', $user->id)->get();
+            // foreach ($jobProfile as $job) {
+            //     # code...
+            //     $job->makeHidden('id');
+            // }
+            
+            $responseData = array_merge($user->toArray(), ["jobs" => $jobProfile]);
+        
+            return response()->json($responseData);
+
+        }
+
+        
         
         return response()->json($user);
         

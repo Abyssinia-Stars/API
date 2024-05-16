@@ -70,7 +70,7 @@ class BalanceController extends Controller
             ], 500);
         }
 
-        Log::info(json_encode($payment));
+        // Log::info(json_encode($payment));
         return $payment['data'];
     }
 
@@ -88,7 +88,7 @@ class BalanceController extends Controller
         // $out->writeln($data)
         // return response()->json($data, 200);    
         //if payment is successful
-        Log::info(json_encode($data) . ' ' . $user_id);
+        // Log::info(json_encode($data) . ' ' . $user_id);
         $charge = $data['data']['charge'];
         $amount = $data['data']['amount'] - $charge;
         if ($data['status'] == 'success') {

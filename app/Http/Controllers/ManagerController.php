@@ -8,7 +8,8 @@ use App\Models\User;
 use App\Models\Manager;
 use App\Models\ArtistProfile;
 use App\Models\Offer;
-
+use App\Models\Subscription;
+use App\Models\Plan;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -72,11 +73,30 @@ class ManagerController extends Controller
       
         $user = User::where('id', $userId)->first();
         $sender = Auth::user();
+        $manager = Manager::where('user_id', $sender->id)->first();
+
         if($user->role != 'artist'){
             return response()->json([
                 'message' => 'User is not an artist'
             ], 400);
         }
+
+        if($manager->is_subscribed == 0){
+            return response()->json([
+                'message' => 'You need to subscribe to send requests'
+            ], 400);
+        }
+
+        $subscription = Subscription::where("user_id", $sender->id)->first();
+        $plan = Plan::where("id", $subscription->plan_id)->first();
+        $artistsManagedByManagerCount = ArtistProfile::where('manager_id', $sender->id)->count();
+
+        if($artistsManagedByManagerCount > $plan->number_of_people){
+            return response()->json([
+                'message' => 'You have reached the maximum number of artists you can manage'
+            ], 400);
+        }
+
         $alreadyExists = Notification::where('user_id', $user->id)->where('source_id', auth()->id())->where('notification_type', 'request')->where('status', "!=", 'deleted')->first();
         if($alreadyExists){
             return response()->json([
@@ -195,6 +215,40 @@ class ManagerController extends Controller
             'artists_managed' => $artistProfile
         ]);
     
+    }
+
+    public function pendingRequests(){
+        $notifications = Notification::where("notification_type", "request")->where("status", "unread")->get();
+        $artistProfile = [];
+
+        if($notifications){
+
+            foreach ($notifications as $notification) {
+                $artistProfile[] = User::where('id', $notification->user_id)->get(["name","profile_picture","id","email"])->first();
+            }
+
+            return response()->json([
+                "pending_requests" => $artistProfile
+            ]);
+        }
+
+
+    }
+
+    public function removeArtist($id){
+        $artist = ArtistProfile::where('user_id', $id)->first();
+        $user = Auth::user();
+        $notification = Notification::where('user_id', $id)->where('source_id', $user->id)->where("status","accepted")->first();
+        if($artist){
+            $artist->manager_id = null;
+            $artist->save();
+            $notification->delete();
+            
+
+            return response()->json(['message'=>"success"],200);
+        }
+        else return response()->json(['message'=>"failed"],200);
+              
     }
 
 }

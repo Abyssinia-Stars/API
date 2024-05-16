@@ -33,7 +33,7 @@ class VerifyIdEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         
-        Log::info($this->notification);
+        // Log::info($this->notification);
         
         
         return [
@@ -49,7 +49,7 @@ class VerifyIdEvent implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
 
-        Log::info($this->notification);
+        // Log::info($this->notification);
 
         return [
             'notification' => $this->notification,

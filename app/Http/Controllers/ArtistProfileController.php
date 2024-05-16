@@ -455,7 +455,7 @@ class ArtistProfileController extends Controller
         
                 $attachment = explode('/', $attachment);
                 $attachment = end($attachment);
-                Log::info($attachment);
+                // Log::info($attachment);
 
                 if($attachment == $attachmentName){
                     

@@ -116,8 +116,10 @@ Route::middleware('auth:api')->group(function () {
     //manager 
     Route::get('/manager/offers', [OfferController::class, 'showOffersByManager']);
     Route::delete("/manager/remove/{id}", [ManagerController::class , "removeManager"]);
+    Route::delete("/artist/remove/{id}", [ManagerController::class, "removeArtist"]);
     Route::get('/manager/profile/{id}', [ManagerController::class, 'getManagerProfile']);
     Route::post("/manager", [ManagerController::class, "store"]);
+    Route::get("manager/pendingRequest", [ManagerController::class, "pendingRequests"]);
     
     //notification
     Route::get('/notifications', [NotificationController::class, 'index']);

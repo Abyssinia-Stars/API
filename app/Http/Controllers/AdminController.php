@@ -40,7 +40,7 @@ class AdminController extends Controller
 
 
 
-        $out->write($request->all());
+        // $out->write($request->all());
 
         $perPage = $request->input('per_page', 10);
         $currentPage = $request->input('current_page', 1);
@@ -133,7 +133,7 @@ class AdminController extends Controller
     {
 
         $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-        $out->writeln($request->all());
+        // $out->writeln($request->all());
         // $user = auth()->user();
 
         $request->validate([
@@ -146,7 +146,7 @@ class AdminController extends Controller
 
         $notification = new Notification([
             'user_id' => $user->id,
-            'notification_type' => 'request',
+            'notification_type' => 'system',
             'source_id' => 1,
             'message' =>'Id Verification ' . $request->is_verified,
             'title' => 'ID Verification',

@@ -47,13 +47,14 @@ Broadcast::channel('messages.{userId}', function ($user, $userId) {
     
 Broadcast::channel('isOnline.{conversationId}', function ($user, $conversationId) {
     
-    if($user->role=="artist"){
+    if($user->role=="artist" || $user->role =="manager"){
         $userIsInConversation = Conversations::where("id", $conversationId)->where("participent_id", $user->id)->get();
         //check if userIsInConversation is not empty
         if(!$userIsInConversation->isEmpty()){
             return ['id' => $user->id, 'name' => $user->name];
         }
     }
+
     else{
         $userIsInConversation = Conversations::where("id", $conversationId)->where("user_id", $user->id)->get();
         //check if userIsInConversation is not empty

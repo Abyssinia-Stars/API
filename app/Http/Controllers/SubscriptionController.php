@@ -8,7 +8,9 @@ use App\Models\Subscription;
 use App\Models\Balance;
 use App\Models\TxnHistory;
 use App\Models\ArtistProfile;
+use App\Models\Manager;
 use Chapa\Chapa\Facades\Chapa as Chapa;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +23,7 @@ class SubscriptionController extends Controller
     {
         $user = Auth::user();
 
-        if($id == 0 ){
+        if($id == 1 ){
             
            $userProfile = ArtistProfile::where('user_id', $user->id)->first();
            $userProfile->is_subscribed = false;
@@ -34,7 +36,9 @@ class SubscriptionController extends Controller
         }
 
         if($id == "downgrade"){
+
             $managerProfile = Manager::where('user_id', $user->id)->first();
+            return $managerProfile;
             $managerProfile->is_subscribed = false;
             $managerProfile->save();
         }
@@ -47,11 +51,11 @@ class SubscriptionController extends Controller
     private function initSubscription(Plans $plans)
     {
         $user = Auth::user();
+        
+        Log::info($plans);
+        
        
         $balance = Balance::where('user_id', $user->id)->firstOrFail();
-
-
-
 
         if ($balance->balance < $plans->price) {
             return response()->json(['error' => 'Insufficient balance'], 400);
@@ -85,16 +89,27 @@ class SubscriptionController extends Controller
      
             $txn->save();
 
-           $userProfile = ArtistProfile::where('user_id', $user->id)->first();
-            $userProfile->is_subscribed = true;
-            $userProfile->offfer_point = $userProfile->offfer_point + 100;
-            $userProfile->save();
+            if($user->role == "artist"){
+
+                $userProfile = ArtistProfile::where('user_id', $user->id)->first();
+                $userProfile->is_subscribed = true;
+                $userProfile->offfer_point = $userProfile->offfer_point + 100;
+                $userProfile->save();
+            }
+            if($user->role == "manager"){
+
+                $userProfile = Manager::where('user_id', $user->id)->first();
+                $userProfile->is_subscribed = true;
+           
+                $userProfile->save();
+            }
 
 
 
             return response()->json(['message' => 'Subscription successful']);
         } catch (\Throwable $th) {
             //throw $th;
+            Log::info($th);
             return response()->json(['error' => $th], 500);
         }
 
@@ -162,9 +177,9 @@ class SubscriptionController extends Controller
         return $subscription;
     }
     public function managerSubscription($number_of_people){
-        $plan = Plans::where("number_of_people", $number_of_people);
-        return $plan;
-        return $this->initSubscription($plan);
+        $plan = Plans::where("number_of_people", $number_of_people)->first();
+       
+        return $this->initSubscription($plan); 
 
 
     }
