@@ -61,6 +61,7 @@ class UserProfileController extends Controller
             'location' => 'string|max:255',
             "gender" => "string|max:255",
             'price_rate' => 'string|max:255',
+            "bio" => "string|max:255",
         ]);
 
         if ($validateData->fails()) {
@@ -123,6 +124,11 @@ class UserProfileController extends Controller
         if($request->has('location')){
             $artistProfile = ArtistProfile::where('user_id', $id)->first();
             $artistProfile->location = $request->location;
+            $artistProfile->save();
+        }
+        if($request->has('bio')){
+            $artistProfile = ArtistProfile::where('user_id', $id)->first();
+            $artistProfile->bio = $request->bio;
             $artistProfile->save();
         }
 

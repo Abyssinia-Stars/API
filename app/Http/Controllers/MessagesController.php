@@ -56,7 +56,7 @@ class MessagesController extends Controller
     public function store(Request $request)
     {
         //
-        Log::info($request->all());
+        // Log::info($request->all());
         $user_id = Auth::user()->id;
         $validator = Validator::make($request->all(), [
             'conversation_id' => 'required',
@@ -95,6 +95,13 @@ class MessagesController extends Controller
                     'participent_id' => $request->user_id
                 ]);
     
+            }
+
+            if($user->role ==="manager"){
+                $conversation = new Conversations([
+                    'user_id' => $conversation->user_id,
+                    'participent_id' => $request->user_id
+                ]);
             }
 
 

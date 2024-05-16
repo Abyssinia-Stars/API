@@ -20,7 +20,7 @@ class EventController extends Controller
         $id=$request->query('id');
 
         $events = Event::where('artist_id', $id)->get();
-        return response()->json(['Events' => $events]);
+        return response()->json(['events' => $events]);
     }
 
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 use App\Models\User;
 use App\Models\Messages;
+use App\Models\ArtistProfile;
 use Carbon\Carbon;
 
 
@@ -68,6 +69,12 @@ class ConversationsController extends Controller
                 count($duplicateConversation) === 0
             ){
 
+                $artist = ArtistProfile::where('user_id', $id)->first();
+                if($artist->manager_id){
+                    $id = $artist->manager_id;
+                }
+
+                
                 $conversation = Conversations::create(
                     [
                         'user_id' => $user->id,
@@ -111,7 +118,14 @@ class ConversationsController extends Controller
         
         //:TODO 
         
-        if($user->role === 'artist'){
+        if($user->role === 'artist' || $user->role==="manager"){
+            if($user->role === "artist"){
+
+                $artistProfile = ArtistProfile::where('user_id', $user->id)->first();
+                if($artistProfile->manager_id){
+                    return response()->json(['message' => 'You are not allowed to view this page'], 400);
+                }
+            }
             $conversations = Conversations::where('participent_id', $user->id)->get();
             foreach ($conversations as $conversation) {
                
@@ -185,6 +199,10 @@ class ConversationsController extends Controller
 
 
         try {
+            $artistProfile = ArtistProfile::where('user_id', $user_id)->first();
+            if($artistProfile->manager_id){
+                return response()->json(['message' => 'You are not allowed to view this page'], 400);
+            }
          
             $doesExist = Conversations::where('user_id', $user_id)->where('participent_id', $participent_id)->first();
             

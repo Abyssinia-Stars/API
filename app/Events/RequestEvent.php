@@ -7,16 +7,13 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-
-use App\Models\Messages;
-use App\Models\Conversations;
 use Illuminate\Support\Facades\Log;
+use App\Models\Notification;
 
-
-class SendSeen implements ShouldBroadcastNow
+class RequestEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -24,8 +21,7 @@ class SendSeen implements ShouldBroadcastNow
      * Create a new event instance.
      */
     public function __construct(
-        private Conversations $conversation,
-        private Messages $message
+        private Notification $notification
     )
     {
         //
@@ -38,26 +34,15 @@ class SendSeen implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        // Log::info($this->conversation);
-        // Log::info($this->message);
-
-        if($this->conversation->participent_id === $this->message->user_id){
-            return [
-                new PrivateChannel('messageseen.' . $this->conversation->participent_id),
-            ];
-        }
-        
-        
         return [
-            new PrivateChannel('messageseen.' . $this->conversation->user_id),
+            new PrivateChannel('request.'.$this->notification->user_id),
         ];
     }
 
     public function broadcastWith(): array
     {
         return [
-         
-            'message' => $this->message,
+            'request' => $this->notification,
         ];
     }
 }

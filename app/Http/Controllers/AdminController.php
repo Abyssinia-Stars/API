@@ -10,6 +10,9 @@ use App\Events\SendNotificationTry;
 use Illuminate\Support\Facades\Broadcast;
 use App\Events\VerifyIdEvent;
 use App\Models\Notification;
+use App\Models\Manager;
+use App\Models\MainTransaction;
+
 
 class AdminController extends Controller
 {
@@ -37,7 +40,7 @@ class AdminController extends Controller
 
 
 
-        $out->write($request->all());
+        // $out->write($request->all());
 
         $perPage = $request->input('per_page', 10);
         $currentPage = $request->input('current_page', 1);
@@ -95,14 +98,32 @@ class AdminController extends Controller
         return response()->json(['message' => 'User is_active status updated successfully']);
     }
 
-    public function getUser(User $user)
+    public function getUser($id)
     {
         // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
         // $out->writeln($user->all());
-        $profile = null;
+        $user = User::where('id', $id)->get(['id', 'name', 'email', 'profile_picture', 'role', 'is_verified', 'is_active'])->first();
+        $profile = [];
 
         if ($user->role === "artist") {
-            $profile = ArtistProfile::where("user_id", $user->id)->first();
+            $profile = ArtistProfile::where("user_id", $user->id)->get(['bio', 'category', 'attachments','manager_id','is_subscribed','location','gender'])->first();
+        }
+        if($user->role === "manager"){
+            $profile = Manager::where("user_id", $user->id)->first();
+            $artistsManagedByManager = ArtistProfile::where('manager_id', $id)->get("user_id","name");
+            $artistProfile = [];
+            foreach($artistsManagedByManager as $artist){
+                $artistProfile[] = User::where('id', $artist->user_id)->get(["name","profile_picture","id","email","user_name"])->first();
+                
+            }
+
+
+          
+            return response()->json([
+                'user' => $user,
+                'profile' => $profile,
+                'artists_managed' => $artistProfile
+            ]);
         }
 
         return response()->json(['user' => $user, 'profile' => $profile]);
@@ -112,7 +133,7 @@ class AdminController extends Controller
     {
 
         $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-        $out->writeln($request->all());
+        // $out->writeln($request->all());
         // $user = auth()->user();
 
         $request->validate([
@@ -125,7 +146,7 @@ class AdminController extends Controller
 
         $notification = new Notification([
             'user_id' => $user->id,
-            'notification_type' => 'request',
+            'notification_type' => 'system',
             'source_id' => 1,
             'message' =>'Id Verification ' . $request->is_verified,
             'title' => 'ID Verification',
@@ -134,6 +155,37 @@ class AdminController extends Controller
         $notification->save();
         broadcast(new VerifyIdEvent($notification));
         return response()->json(['message' => 'User verification status updated successfully']);
+    }
+
+    public function getMainTransactionsAndBalance(Request $request){
+
+        $validation = Validator::make($request->all(), [
+            'limit' => 'integer|min:1|max:100',
+            'page' => 'integer|min:1',
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                'message' => 'Bad Request',
+                'errors' => $validation->errors()
+            ], 400);
+        }
+
+        $limit = $request->input('limit', 10);
+        $page = $request->input('page', 1);
+
+        $transactions = MainTransaction::orderBy('id', 'desc')->paginate($limit, ['*'], 'page', $page);
+        $balance = 0;
+        $allTransactions = MainTransaction::all();
+        //convert all from and to ids with names from user
+        foreach($transactions as $transaction){
+            $transaction->client_id = User::where('id', $transaction->client_id)->get('name')->first();
+            $transaction->artist_id = User::where('id', $transaction->artist_id)->get('name')->first();
+        }
+        foreach($allTransactions as $transaction){
+            $balance += $transaction->net_amount;
+        }
+        return response()->json(['transactions' => $transactions, 'balance' => $balance]);
     }
 
 

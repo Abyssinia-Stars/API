@@ -13,8 +13,21 @@ class NotificationController extends Controller
     {
        
         $id = Auth::user()->id;
-        $notifications = Notification::where('user_id', $id)->where('status', '!=', 'deleted')
+
+        //order notfications from new to old 
+
+
+
+        $notifications = Notification::where('user_id', $id)->orderBy('created_at', 'desc')
         ->get();
+
+        //only return notifications that have status accepted if it has not expired give it 1minute after being accepted to expire
+        $notifications = $notifications->filter(function($notification){
+            return $notification->status == 'unread';
+        });
+
+
+
         return response()->json(['Notifications' => $notifications]);
     }
 
@@ -29,8 +42,8 @@ class NotificationController extends Controller
         $user_id = Auth::user()->id;
         
         $notification = Notification::where('user_id', $user_id)->where("id", $id)->first();
-        $notification->update(['status' => $status]);
-   
+        $notification->status = $status;
+        $notification->save();
 
         return response()->json(['Notification' => $notification]);
     }

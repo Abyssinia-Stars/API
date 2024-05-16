@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Prompts\Output\ConsoleOutput;
 
+
+use App\Events\RequestEvent;
 use function Laravel\Prompts\error;
 
 class ArtistProfileController extends Controller
@@ -244,12 +246,13 @@ class ArtistProfileController extends Controller
             'name' => $artist->user->name,
             'email' => $artist->user->email,
             'category' => $artist->category,
-            'attchments' => $artist->attachments,
+            'attachments' => $artist->attachments,
             'youtube_links' => $artist->youtube_links,
             'profile_picture' => $userProfile->profile_picture,
             'reviews' => $reviews,
             'average_rating' => $averageRating,
-            'completed_offers' => $offersWithJobTitle
+            'completed_offers' => $offersWithJobTitle,
+            'manager_id' => $artist->manager_id
 
                 // Add other user columns as needed
         ]);
@@ -288,7 +291,7 @@ class ArtistProfileController extends Controller
                 'name' => $userProfile->name,
                 'email' => $userProfile->email,
                 'category' => null,
-                'attchments' => null,
+                'attachments' => null,
                 'youtube_links' =>null,
                 'profile_picture' => $userProfile->profile_picture,
                 'reviews' => $reviews,
@@ -304,7 +307,7 @@ class ArtistProfileController extends Controller
             'name' => $artist->user->name,
             'email' => $artist->user->email,
             'category' => $artist->category,
-            'attchments' => $artist->attachments,
+            'attachments' => $artist->attachments,
             'youtube_links' => $artist->youtube_links,
             'profile_picture' => $userProfile->profile_picture,
             'reviews' => $reviews,
@@ -392,8 +395,16 @@ class ArtistProfileController extends Controller
             ], 400);
         }
 
+        $artistProfile = ArtistProfile::where('user_id', auth()->user()->id)->first();
+        if($request->status == 'accepted'){
+            $artistProfile->manager_id = $notification->source_id;
+            $artistProfile->save();
+        }
+  
         $notification->status = $request->status;
         $notification->save();
+
+        broadcast(new RequestEvent($notification));
 
         return response()->json([
             'message' => 'Response sent successfully',
@@ -444,7 +455,7 @@ class ArtistProfileController extends Controller
         
                 $attachment = explode('/', $attachment);
                 $attachment = end($attachment);
-                Log::info($attachment);
+                // Log::info($attachment);
 
                 if($attachment == $attachmentName){
                     

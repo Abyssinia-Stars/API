@@ -36,7 +36,7 @@ class GoogleLoginController extends Controller
            
         }catch(\Exception $e){
          
-            $out->writeln($e->getMessage());
+            // $out->writeln($e->getMessage());
             return response()->json(['error' => $e->getMessage()], 400);
         }
 

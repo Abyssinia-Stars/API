@@ -59,13 +59,13 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
     
-    Route::prefix("notification/manager")->middleware('manager')->group(function () {
+    Route::prefix("manager")->middleware('manager')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ManagerController::class, 'handleResponse']);
         Route::get('/', [ManagerController::class, 'getNotifications']);
     });
 
-    Route::prefix("notification/artist")->middleware('artist')->group(function () {
+    Route::prefix("artist")->middleware('artist')->group(function () {
         Route::post('/send-request/{userId}', [ArtistProfileController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ArtistProfileController::class, 'handleResponse']);
         Route::get('/', [ArtistProfileController::class, 'getNotifications']);
@@ -105,16 +105,27 @@ Route::middleware('auth:api')->group(function () {
 
     // subscription
     Route::post("/subscribe/{id}", [SubscriptionController::class, "subscribe"]);
+    Route::post("/subscribe/manager/{number_of_people}", [SubscriptionController::class, "managerSubscription"]);
     Route::post("/buyOffer", [SubscriptionController::class, "buyOffer"]);
+
 
     Route::get("/artist/offers", [OfferController::class, "showOffersByArtist"]);
     Route::put("/artist/offers/{id}/{status}", [OfferController::class, "acceptOffer"]);
-
-
+    
+    
+    //manager 
+    Route::get('/manager/offers', [OfferController::class, 'showOffersByManager']);
+    Route::delete("/manager/remove/{id}", [ManagerController::class , "removeManager"]);
+    Route::delete("/artist/remove/{id}", [ManagerController::class, "removeArtist"]);
+    Route::get('/manager/profile/{id}', [ManagerController::class, 'getManagerProfile']);
+    Route::post("/manager", [ManagerController::class, "store"]);
+    Route::get("manager/pendingRequest", [ManagerController::class, "pendingRequests"]);
+    
     //notification
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/{id}', [NotificationController::class, 'show']);
     Route::put('/notifications/{id}/{status}', [NotificationController::class, 'update']);
+
 
 
     //conversations
@@ -170,6 +181,10 @@ Route::controller(AuthController::class)->group(function () {
         Route::patch("{user}/toggle-is-active", [AdminController::class, 'toggleIsActive']);
         Route::post("/{user}/set-verification-status", [AdminController::class, 'setVerificationStatus']);
         Route::post("/{user}/get", [AdminController::class, 'getUser']);
+    });
+
+    Route::prefix("admin")->middleware("admin")->group(function () {
+        Route::get("main_transactions", [AdminController::class, 'getMainTransactionsAndBalance']);
     });
 
     Route::post('/register', 'registerUser')->name('auth.register');
