@@ -139,7 +139,12 @@ class OfferController extends Controller
  
         
         try {
-           
+            
+            $offerAlreadyExists = Offer::where('work_id', $request->work_id)->where("artist_id", $request->artist_id)->first();
+            if($offerAlreadyExists){
+
+                return response()->json(['message' => "You can't send more than one offer per job"],409);
+            }
             $balance = Balance::where('user_id', $client_id)->first();
             // Log::info($balance);
             if($balance->balance < $request->price ){
@@ -156,6 +161,7 @@ class OfferController extends Controller
                 if($artistProfile->offfer_point < $offerPointRequired){
                     return response()->json(['message' => 'Artist does not have enough offer points'], 400);
                 }
+
                 $offerDetails = Offer::create(
                     [
                         'work_id' => $request->work_id,
@@ -177,7 +183,7 @@ class OfferController extends Controller
                         'title' => 'New Offer',
                         'source_id' => $client_id,
                         'message' => 'You have a new offer',
-                        'type' => 'offer',
+                        'type' => 'system',
                         'status' => 'unread',
                 
                     
@@ -314,9 +320,21 @@ class OfferController extends Controller
 
         $artist_id = Auth::user()->id;
 
-        $offer = Offer::where('id', $id)->where('artist_id', $artist_id)
+        $artistProfile = null;
+        if(Auth::user()->role == "manager"){
+            
+            $artistProfile = ArtistProfile::where('manager_id', $artist_id)->first();
+            
+        }
+        
+        else{
+            
+            $artistProfile = ArtistProfile::where("user_id", $artist_id)->first();
+        }
+        
+        
+        $offer = Offer::where('id', $id)->where('artist_id', $artistProfile->user_id)
         ->first();
-        $artistProfile = ArtistProfile::where('user_id', $artist_id)->first();
  
         if($artistProfile->offfer_point < $offer->offer_point_required){
             return response()->json(['message' => 'You do not have enough offer points'], 400);
@@ -354,7 +372,7 @@ $balance->balance = $newbalance;
                 'title' => 'New Offer',
                 'source_id' => $artist_id,
                 'message' => 'Offer has been accepted',
-                'type' => 'offer',
+                'type' => 'system',
                 'status' => 'unread',
         
             

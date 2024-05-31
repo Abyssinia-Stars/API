@@ -17,7 +17,6 @@ class NotificationController extends Controller
         //order notfications from new to old 
 
 
-
         $notifications = Notification::where('user_id', $id)->orderBy('created_at', 'desc')
         ->get();
 

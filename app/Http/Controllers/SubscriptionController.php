@@ -9,6 +9,8 @@ use App\Models\Balance;
 use App\Models\TxnHistory;
 use App\Models\ArtistProfile;
 use App\Models\Manager;
+use App\Models\Offer;
+use App\Models\Work;
 use Chapa\Chapa\Facades\Chapa as Chapa;
 
 use Illuminate\Http\Request;
@@ -37,10 +39,40 @@ class SubscriptionController extends Controller
 
         if($id == "downgrade"){
 
+         
+
             $managerProfile = Manager::where('user_id', $user->id)->first();
-            return $managerProfile;
-            $managerProfile->is_subscribed = false;
-            $managerProfile->save();
+         
+           
+
+            $areAllOffersCompleted = true;
+            $artistProfile = ArtistProfile::where('manager_id', $managerProfile->user_id)->get();
+
+
+            foreach ($artistProfile as $artist) {
+                $offers = Offer::where("artist_id", $artist->user_id)->get();
+                foreach($offers as $offer){
+                     if($offer->status == "accepted" || $offer->status == "pending"){
+                         $areAllOffersCompleted = false;
+                             break;
+                 } }
+            }
+
+            if($areAllOffersCompleted){
+
+                $managerProfile->is_subscribed = false;
+                $managerProfile->save();
+                foreach ($artistProfile as $artist) {
+                    $artist->manager_id = null;
+                    $artist->save();
+                }
+
+
+            }
+            else{
+                return response()->json(['message' => 'You have pending offers'], 400);
+            }
+            return;
         }
      
         $plan = Plans::findOrFail($id);

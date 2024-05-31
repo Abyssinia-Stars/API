@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use App\Models\Image; 
 use App\Models\User;
 use App\Models\ArtistProfile;
+use App\Models\Offer;
+
 
 class UserProfileController extends Controller
 {
@@ -175,34 +177,105 @@ class UserProfileController extends Controller
         public function destroy(){
             $id = Auth::user()->id;
             $user = User::find($id);
-        
-            $user->is_deleted = true;
-            $user->save();
+            $areAllOffersCompleted = true;
 
-      
-            $profilePicture = $user->profile_picture;
-            $getTheFile = explode('/', $profilePicture);
-            $profilePicture = end($getTheFile);
-           
-            if($profilePicture != null){
-                Storage::delete('public/profile_pictures/'.$profilePicture);
-                $user->profile_picture = null;
+            $offers = [];
+
+            if($user->role === "artist"){
+                $offers = Offer::where("artist_id", $id)->get();
+                
+               
             }
-            
-            try{
-                $attachments = ArtistProfile::where('user_id', $id)->first()->attachments; 
-                if($attachments == null){
-                    return response()->json(['message' => 'Profile deleted successfully'],200);
-                }
-                $attachments = explode(',', $attachments);
+
+            if($user->role === "customer"){
+                $offers = Offer::where("client_id", $id)->get();
+
+            }
+            if($user->role === "manager"){
+                $areAllOffersCompleted = true;
+                $artistProfile = ArtistProfile::where('manager_id', $id)->get();
     
-                foreach($attachments as $attachment){
-                    Storage::delete($attachment);
+                
+ 
+                foreach ($artistProfile as $artist) {
+                    $offers = Offer::where("artist_id", $artist->user_id)->get();
+                    foreach($offers as $offer){
+                         if($offer->status == "accepted" || $offer->status == "pending"){
+                             $areAllOffersCompleted = false;
+                                 break;
+                     } }
+                }
+                // return $areAllOffersCompleted;
+                if($areAllOffersCompleted){
+                    $user->is_deleted = true;
+                    $user->save();
+        
+              
+                    $profilePicture = $user->profile_picture;
+                    $getTheFile = explode('/', $profilePicture);
+                    $profilePicture = end($getTheFile);
+                   
+                    if($profilePicture != null){
+                        Storage::delete('public/profile_pictures/'.$profilePicture);
+                        $user->profile_picture = null;
+                    }
+                    
+                    return response()->json(["message"=> "success"], 200);
+                    
+        
+                }
+                else{
+                    return response()->json(["message"=> "you have unfinished offers"], 400);
+                }
+    }
+
+                foreach ($offers as $offer) {
+                 
+                   if($offer->status !== "completed"){
+                    $areAllOffersCompleted = false;
+                    break;
+                   }
                 }
 
-            }catch(\Exception $e){
-                return response()->json(['message' => 'Profile deleted successfully'],200);
-            }
+               
+                if($areAllOffersCompleted){
+                    $user->is_deleted = true;
+                    $user->save();
+        
+              
+                    $profilePicture = $user->profile_picture;
+                    $getTheFile = explode('/', $profilePicture);
+                    $profilePicture = end($getTheFile);
+                   
+                    if($profilePicture != null){
+                        Storage::delete('public/profile_pictures/'.$profilePicture);
+                        $user->profile_picture = null;
+                    }
+
+                    
+                    if($user->role === "artist"){
+                    try{
+                        $attachments = ArtistProfile::where('user_id', $id)->first()->attachments; 
+                        if($attachments == null){
+                            return response()->json(['message' => 'Profile deleted successfully'],200);
+                        }
+                        $attachments = explode(',', $attachments);
+            
+                        foreach($attachments as $attachment){
+                            Storage::delete($attachment);
+                        }
+        
+                    }catch(\Exception $e){
+                        return response()->json(['message' => 'Profile deleted successfully'],200);
+                    }}
+
+                    return response()->json(['message' => 'Profile deleted successfully'],200);
+        
+                }
+                else{
+                    return response()->json(["message"=> "you have unfinished offers"], 400);
+                }
+        
 
 
 

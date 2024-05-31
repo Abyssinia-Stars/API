@@ -9,7 +9,7 @@ use App\Models\Manager;
 use App\Models\ArtistProfile;
 use App\Models\Offer;
 use App\Models\Subscription;
-use App\Models\Plan;
+use App\Models\Plans;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -88,7 +88,7 @@ class ManagerController extends Controller
         }
 
         $subscription = Subscription::where("user_id", $sender->id)->first();
-        $plan = Plan::where("id", $subscription->plan_id)->first();
+        $plan = Plans::where("id", $subscription->plan_id)->first();
         $artistsManagedByManagerCount = ArtistProfile::where('manager_id', $sender->id)->count();
 
         if($artistsManagedByManagerCount > $plan->number_of_people){
@@ -138,6 +138,7 @@ class ManagerController extends Controller
         $validate = Validator::make($request->all(), [
             'status' => 'required|in:accepted,rejected'
         ]);
+        
 
         $notification = Notification::find($notificationId);
 

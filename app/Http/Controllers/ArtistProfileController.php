@@ -338,7 +338,7 @@ class ArtistProfileController extends Controller
         try{
             $notificationAlreadyExists = Notification::where('user_id', $user->id)
                 ->where('source_id', auth()->user()->id)
-                ->where('notification_type', 'artist_manager')
+                ->where('notification_type', 'request')
                 ->where('status', 'pending')
                 ->first();
 
