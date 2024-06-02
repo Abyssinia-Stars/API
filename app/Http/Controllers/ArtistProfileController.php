@@ -96,14 +96,15 @@ class ArtistProfileController extends Controller
             'location' => 'string|max:255',
             'gender' => 'string|max:255',
             'price_rate' => 'string|max:255',
-
         ]);
 
+        
         if ($validation->fails()) {
             return response()->json(['error' => $validation->errors()], 400);
         }
         $validatedData = $request->all();
-
+        
+ 
         // Upload the cover picture
         $profilePicturePath = Storage::url($request->file('profile_picture')->store('public/profile_pictures'));
 
@@ -117,6 +118,7 @@ class ArtistProfileController extends Controller
         }
         try {
             $user = Auth::user(); 
+         
             // Create the ArtistProfile with the validated data
             $artistProfile = ArtistProfile::create(
                 [
@@ -125,9 +127,9 @@ class ArtistProfileController extends Controller
                     'category' => $validatedData['category'],
                     'youtube_links' => $validatedData['youtube_links'],
                     'attachments' => $attachmentPaths,
-                    'location' =>  'N/A',
-                    'gender'=>  'N/A',
-                    'price_rate' => 'N/A',
+                    'gender'=>  $validatedData['gender'],
+                    'location' =>  $validatedData['location'],
+                    'price_rate' => $validatedData['price_rate'],
                 ]
             );
             // Update the user's profile picture if provided in the request
@@ -136,11 +138,10 @@ class ArtistProfileController extends Controller
                 $user->save();
                 // return response()->json(['message' => 'Profile picture updated successfully']);
             }
-            // Optionally, associate the user with the artist profile here
-            // For example, $artistProfile->user_id = $user->id;
-            // $artistProfile->save();
+        
             return response()->json(['message' => 'Artist profile created successfully', 'artist_profile' => $artistProfile]);
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return response()->json(['message' => 'Error creating artist profile: ' . $e->getMessage()], 500);
         }
     }

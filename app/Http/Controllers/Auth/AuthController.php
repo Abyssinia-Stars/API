@@ -192,6 +192,10 @@ try {
 
     public function me(){
         $user = Auth::user();
+        if($user->is_active === false){
+            return response()->json(['error' => 'Account has been Deactivated! Please Contact Support'], 401);
+        }
+        
         if ($user && $user->role == 'artist') {
             $artistProfile = ArtistProfile::where('user_id', $user->id)->firstOrFail();
             $subscriptionPlan = Subscription::where('user_id', $user->id)->first();

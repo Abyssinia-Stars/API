@@ -82,10 +82,8 @@ class MessagesController extends Controller
                 'seen' => false
             ]);
 
-            $conversation = Conversations::where('id', $request->conversation_id
-        
-
-            )->first();
+            $conversation = Conversations::where('id', $request->conversation_id)->first();
+     
 
             $user  = User::where('id', $request->user_id)->first();
 
@@ -94,10 +92,11 @@ class MessagesController extends Controller
                     'user_id' => $conversation->user_id,
                     'participent_id' => $request->user_id
                 ]);
-    
+
+
             }
 
-            if($user->role ==="manager"){
+         else if($user->role ==="manager"){
                 $conversation = new Conversations([
                     'user_id' => $conversation->user_id,
                     'participent_id' => $request->user_id
@@ -118,6 +117,7 @@ class MessagesController extends Controller
 
             // return response()->json(['message' => $request->user_id], 200);
     
+            Log::info($conversation);
             broadcast(new SendMessage($conversation,$message));
 
             return response()->json(['message' => $message], 200);

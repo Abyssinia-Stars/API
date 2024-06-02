@@ -37,8 +37,9 @@ class SendMessage implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        Log::info($this->conversation);
+        // Log::info($this->conversation);
         // Log::info($this->message);
+        
        
         if($this->conversation->user_id === $this->message->user_id){
             return [

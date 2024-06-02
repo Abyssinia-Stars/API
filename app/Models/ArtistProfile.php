@@ -14,6 +14,9 @@ class ArtistProfile extends Model
         'user_id',
         'bio',
         'category',
+        'location',
+        'gender',
+        
         'youtube_links',
         'attachments',
         'role',
