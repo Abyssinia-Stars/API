@@ -9,6 +9,7 @@ use App\Models\Favorites;
 use App\Models\Review;
 use App\Models\ArtistProfile;
 use App\Models\Offer;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -100,82 +101,150 @@ class CustomerController extends Controller
 
     
     }
-public function getArtistByParams(Request $request){
+    public function searchArtists(Request $request){
+        $validate = Validator::make($request->all(), [
+            'q' => 'string|nullable',
+        
+        ]);
+    
+        if ($validate->fails()) {
+            return response()->json([
+                'message' => 'Bad Request',
+                'errors' => $validate->errors()
+            ], 400);
+        }
 
-    $validate = Validator::make($request->all(), [
-        'q' => 'string|nullable',
-        'category' => 'array',
-        'limit' => 'integer|min:1|max:100',
-        'page' => 'integer|min:1'
-    ]);
+        $users = User::where('role', 'artist')
+        ->where('is_active', 1)
+        ->where('is_verified', 'verified')
+        ->where(function ($query) use ($request) {
+            $query->where('name', 'like', "%$request->q%")
+                ->orWhere('email', 'like', "%$request->q%");
+        })->get();
 
-    if($validate->fails()){
         return response()->json([
-            'message' => 'Bad Request',
-            'errors' => $validate->errors()
-        ], 400);
+            'artists' => $users
+        ]);
+
+
     }
-
-    $limit = $request->input('limit', 10);
-    $page = $request->input('page', 1);
-    $categories = $request->input('category',[]);
-    $q = $request->input('q', '');
-
-
-
-    $users = User::where('role', 'artist')
-    ->where('is_verified', 'verified')
-    ->where('is_active', true)
-    ->where(function ($query) use ($q) {
-        $query->where('name', 'like', "%$q%")
-            ->orWhere('email', 'like', "%$q%");
-    })->inRandomOrder()
-    ->get();
-
+    public function getArtistByParams(Request $request)
+    {
+    
   
-
-$artistProfiles = ArtistProfile::where(function ($query) use ($categories) {
+        $validate = Validator::make($request->all(), [
+            'q' => 'string|nullable',
+            'category' => 'array',
+            'limit' => 'integer|min:1|max:100',
+            'page' => 'integer|min:1'
+        ]);
     
-    if(in_array("all", $categories) || in_array("All", $categories)){
-        return;
-    }
-    $query->whereJsonContains('category', $categories);
+        if ($validate->fails()) {
+            return response()->json([
+                'message' => 'Bad Request',
+                'errors' => $validate->errors()
+            ], 400);
+        }
+    
+        $limit = $request->input('limit', 10);
+        $page = $request->input('page', 1);
+        $categories = $request->input('category', []);
+        $price_rate = $request->input('hourly_rate', []);
+        $location = $request->input('location', []);
+        $gender = $request->input('gender', []);
+        $roles = $request->input('profession', []);
+        $q = $request->input('q', '');
+    
+        $users = null;
+    
+        if (in_array('artist', $roles)) {
+            $users = User::where('role', 'artist')
+                ->where('is_active', 1)
+                ->where('is_verified', 'verified')
+                ->where(function ($query) use ($q) {
+                    $query->where('name', 'like', "%$q%")
+                        ->orWhere('email', 'like', "%$q%");
+                })->inRandomOrder()->get();
+        } else if (in_array('manager', $roles)) {
+            $users = User::where('role', 'manager')
+                ->where('is_active', 1)
+                ->where('is_verified', 'verified')
+                ->where(function ($query) use ($q) {
+                    $query->where('name', 'like', "%$q%")
+                        ->orWhere('email', 'like', "%$q%");
+                })->inRandomOrder()->get();
+        }
 
     
-    })
-    ->whereIn('user_id', $users->pluck('id')) 
-    ->get();
 
-// $reviewProfiles = Review::where('artist_id', $users->pluck('id'))->get();
-$averageRatings = [];
- 
+        $artistProfiles = ArtistProfile::where(function ($query) use ($categories, $location, $gender, $price_rate) {
+            if (in_array("all", $categories) && in_array("all", $location) && in_array("all", $gender) && in_array("all", $price_rate)) {
+                return;
+            }
+    
+            $query->whereJsonContains('category', $categories)
+            ->orWhere('location', $location[0])
+            ->orWhere(function ($query) use ($price_rate) {
+                
+                if (!in_array("all", $price_rate)) {
+                    if (!empty($price_rate) && count($price_rate) > 0) {
+                        $priceSplitArray = explode('_', $price_rate[0]);
+                        if (count($priceSplitArray) == 2) {
+                            $minPrice = (int) $priceSplitArray[0];
+                            $maxPrice = (int) $priceSplitArray[1];
+        
+            
+                            if (is_numeric($minPrice) && is_numeric($maxPrice)) {
+                                  $result = $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice])->get();
+                                  
+                             
+                            }
+                        }
+                    }
+                }
+            })
+            ->orWhere('gender', $gender[0]);
+            $sql = $query->toSql();
+            $bindings = $query->getBindings();
+    
+    $fullSql = vsprintf(str_replace('?', '%s', $sql), $bindings);
+    
+    Log::info($fullSql);
+        
+           
+        })
+        ->whereIn('user_id', $users->pluck('id'))
+        ->get();
+    
+        // Log::info($artistProfiles);
 
-
-$results = [];
-foreach ($users as $user) {
-    $profile = $artistProfiles->firstWhere('user_id', $user->id);
-    // $ratings = $reviewProfiles->firstWhere('artist_id', $user->id);
-    $averageRating = $this->calculateAverageRating($user);
-    if(!$profile){
-        continue;
+    
+        $averageRatings = [];
+    
+        $results = [];
+        foreach ($users as $user) {
+            $profile = $artistProfiles->firstWhere('user_id', $user->id);
+            // $ratings = $reviewProfiles->firstWhere('artist_id', $user->id);
+            $averageRating = $this->calculateAverageRating($user);
+            if (!$profile) {
+                continue;
+            }
+            $results[] = [
+                'user' => $user,
+                'profile' => $profile,
+                'rating' => $averageRating
+            ];
+        }
+    
+        $results = collect($results)->forPage($page, $limit)->values();
+        return response()->json([
+            'artists' => $results,
+            'total' => count($results),
+            'previousPage' => $page > 1,
+            'nextPage' => $results->count() > $page + 1
+        ]);
     }
-    $results[] = [
-        'user' => $user,
-        'profile' => $profile,
-        'rating' => $averageRating
-    ];
-}
-
-
-$results = collect($results)->forPage($page, $limit)->values();
-    return response()->json([
-        'artists' => $results,
-        'total' => count($results),
-        'previousPage' => $page > 1,
-        'nextPage' => $results->count() > $page + 1
-    ]);
-
-}
+    
 
     public function addArtistToFavorites($userId){
 

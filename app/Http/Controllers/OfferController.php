@@ -308,9 +308,14 @@ class OfferController extends Controller
 
         try {
 
-            $offer->delete();
+            if($offer->status ==="pending"){
 
-            return response()->json(['message' => 'Offer deleted successfully']);
+                $offer->delete();
+    
+                return response()->json(['message' => 'Offer deleted successfully']);
+            }else{
+                return response()->json(['message' => 'You can not delete an offer that has been accepted or rejected'], 400);
+            }
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error deleting Offer: ' . $e->getMessage()], 500);
         }

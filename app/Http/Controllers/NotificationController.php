@@ -41,10 +41,10 @@ class NotificationController extends Controller
         $user_id = Auth::user()->id;
         
         $notification = Notification::where('user_id', $user_id)->where("id", $id)->first();
+     
         $notification->status = $status;
         $notification->save();
-
-        return response()->json(['Notification' => $notification]);
+        $this->index();
     }
 
 

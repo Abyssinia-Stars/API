@@ -21,6 +21,7 @@ class ManagerMiddleware
                 'message' => 'User is not a manager'
             ], 400);
         }
+
         return $next($request);
     }
 }

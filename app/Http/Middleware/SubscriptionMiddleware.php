@@ -19,10 +19,20 @@ class SubscriptionMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user_id = Auth::user()->id;
-        $artistProfile = ArtistProfile::where('user_id', $user_id)->first();
-        if (!$artistProfile->is_subscribed) {
-            return response()->json(['error' => 'Artist not subscribed'], 400);
+        $user = Auth::user();
+        if($user->role ==="artist"){
+
+            $artistProfile = ArtistProfile::where('user_id', $user->id)->first();
+            if (!$artistProfile->is_subscribed) {
+                return response()->json(['error' => 'Artist not subscribed'], 400);
+            }
+        }
+        else if($user->role==="manager"){
+            $managerProfile = Manager::where('user_id', $user->id)->first();
+            if (!$managerProfile->is_subscribed) {
+                return response()->json(['error' => 'Manager not subscribed'], 400);
+            }
+
         }
         return $next($request);
     }

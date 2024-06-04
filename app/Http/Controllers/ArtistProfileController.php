@@ -247,6 +247,9 @@ class ArtistProfileController extends Controller
             'name' => $artist->user->name,
             'email' => $artist->user->email,
             'category' => $artist->category,
+            'price_rate'=> $artist->price_rate,
+            'location' => $artist->location,
+            
             'attachments' => $artist->attachments,
             'youtube_links' => $artist->youtube_links,
             'profile_picture' => $userProfile->profile_picture,

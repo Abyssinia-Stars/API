@@ -26,6 +26,7 @@ use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ConversationsController;
 use App\Http\Controllers\MessagesController;
+use App\Http\Controllers\ReportController;
 use App\Events\SendNotificationTry;
 use App\Events\TryMessage;
 use App\Jobs\SendNotification;
@@ -86,6 +87,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get("reviews", [CustomerController::class, 'getReviews']);
         Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
     Route::get("/offers/{id}", [OfferController::class, "showOffersByClient"]);
+    Route::delete("/offers/{id}", [OfferController::class, "destroy"]);
     Route::put("/jobs/{id}/completed", [OfferController::class, "jobIsOver"]);
 
     });
@@ -144,6 +146,12 @@ Route::middleware('auth:api')->group(function () {
 
     Route::delete("/attachments/{attachmentName}", [ArtistProfileController::class, 'deleteAttachment']);
 
+    //reports
+
+    Route::post("/report", [ReportController::class, 'create']);
+    Route::get("/reports", [ReportController::class, 'show']);
+    Route::post("/report/{id}", [ReportController::class, 'reportReviewed']);
+
     //test subscription
 
     Route::get("/premFeature", function () {
@@ -167,6 +175,7 @@ Route::get('/get-random-categories', [CustomerController::class, 'getRandomCateg
 Route::get('/get-popular-artists', [CustomerController::class, 'getPopularArtistsByRating']);
 Route::get("reviews", [ArtistProfileController::class, 'getReviews']);
 Route::get("/artists", [CustomerController::class, 'getArtistByParams']);
+Route::get("/findArtists", [CustomerController::class, 'searchArtists']);
 Route::get('/artist/profile/{id}', [ArtistProfileController::class, 'getArtistProfile']);
 
 Route::controller(OtpVerifyController::class)->group(function () {

@@ -12,6 +12,7 @@ use App\Events\SendMessage;
 use App\Events\SendSeen;
 
 use App\Models\Conversations;
+use App\Models\ArtistProfile;
 use App\Models\User;
 
 
@@ -83,11 +84,26 @@ class MessagesController extends Controller
             ]);
 
             $conversation = Conversations::where('id', $request->conversation_id)->first();
+            
+
+          
      
 
             $user  = User::where('id', $request->user_id)->first();
+            $artistExists = User::where('id', $conversation->participent_id)->first();
+
+        
+            
+            if($artistExists){
+                $artistProfile = ArtistProfile::where('user_id', $artistExists->id)->first();
+                if($artistProfile->offfer_point < 1){
+                    return response()->json(['message' => 'Artist do not have enough offer points to recieve a message'], 400);
+                }
+            }
 
             if($user->role === "artist"){
+                
+              
                 $conversation = new Conversations([
                     'user_id' => $conversation->user_id,
                     'participent_id' => $request->user_id
@@ -117,7 +133,7 @@ class MessagesController extends Controller
 
             // return response()->json(['message' => $request->user_id], 200);
     
-            Log::info($conversation);
+         
             broadcast(new SendMessage($conversation,$message));
 
             return response()->json(['message' => $message], 200);

@@ -102,7 +102,7 @@ class AdminController extends Controller
     {
         // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
         // $out->writeln($user->all());
-        $user = User::where('id', $id)->get(['id', 'name', 'email', 'profile_picture', 'role', 'is_verified', 'is_active'])->first();
+        $user = User::where('id', $id)->get(['id', 'name','id_image', 'email', 'profile_picture', 'role', 'is_verified', 'is_active'])->first();
         $profile = [];
 
         if ($user->role === "artist") {
