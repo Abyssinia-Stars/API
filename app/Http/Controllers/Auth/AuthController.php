@@ -235,11 +235,18 @@ try {
 
                 $subscriptionPlan->makeHidden('id');
             }
-            $managerProfile->makeHidden('id'); 
+            if($managerProfile){
+                $managerProfile->makeHidden('id'); 
+
+                $responseData = array_merge($user->toArray(), $managerProfile->toArray());
+            }
+            else {
+                $responseData = $user->toArray();
+            }
            
+            
 
             
-            $responseData = array_merge($user->toArray(), $managerProfile->toArray());
             if ($subscriptionPlan) {
                 $responseData = array_merge($responseData, $subscriptionPlan->toArray());
             }

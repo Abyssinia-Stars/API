@@ -38,13 +38,15 @@ class NotificationController extends Controller
 
     public function update($id,$status)
     {
+
         $user_id = Auth::user()->id;
         
         $notification = Notification::where('user_id', $user_id)->where("id", $id)->first();
-     
+        
         $notification->status = $status;
         $notification->save();
-        $this->index();
+
+      
     }
 
 

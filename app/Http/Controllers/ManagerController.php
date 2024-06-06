@@ -25,7 +25,7 @@ class ManagerController extends Controller
     {
 
         $validation = Validator::make($request->all(), [
-            'profile_picture' => 'image',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'bio' => 'string|max:255',
             'location' => 'string|max:255',
             'gender' => 'string|max:255',
@@ -38,6 +38,7 @@ class ManagerController extends Controller
         $validatedData = $request->all();
 
         // Upload the cover picture
+        if($request->hasFile('profile_picture'))
         $profilePicturePath = Storage::url($request->file('profile_picture')->store('public/profile_pictures'));
 
         // Upload the attachments
