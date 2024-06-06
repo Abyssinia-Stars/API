@@ -63,6 +63,9 @@ class VenuesController extends Controller
             $venue->location = $request->location;
             $venue->capacity = $request->capacity;
             $venue->price = $request->price;
+            $venue->phone = $request->phone;
+            $venue->email = $request->email;
+            $venue->map = $request->map;
             $venue->image = $imagePath;
             $venue->save();
 
@@ -79,6 +82,8 @@ class VenuesController extends Controller
     public function show(Venues $venues)
     {
         //
+
+        
     }
 
     /**
