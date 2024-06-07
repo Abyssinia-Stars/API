@@ -35,7 +35,10 @@ class EventBlogsController extends Controller
     public function store(Request $request)
     {
         // Validate the request
+
+        Log::info($request->all());
         $validation = Validator::make($request->all(), [
+            'user_id' => 'required', // 'user_id' is required
             'title' => 'required',
             'description' => 'required',
             'event_date' => 'required|date',
@@ -63,6 +66,7 @@ class EventBlogsController extends Controller
 
         // Create the event
         $event = EventBlogs::create([
+            'user_id' => $request->user_id,
             'title' => $request->title,
             'description' => $request->description,
             'event_date' => $request->event_date,
