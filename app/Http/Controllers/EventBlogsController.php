@@ -17,8 +17,10 @@ class EventBlogsController extends Controller
     {
         //
 
-        //  $events = EventBlogs::all();
-        return response()->json(['Message' => 'Hello'], 200);
+        $events = EventBlogs::with(['user:id,name,profile_picture'])->get();
+
+        return response()->json($events);
+
     }
 
     /**
