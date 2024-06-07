@@ -236,6 +236,7 @@ class ArtistProfileController extends Controller
                 'profile_picture' => $userProfile->profile_picture,
                 'reviews' => $reviews,
                 'average_rating' => $averageRating,
+                'manager_id' => null,
                
             ]);
         }

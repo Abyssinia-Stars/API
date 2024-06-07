@@ -200,6 +200,7 @@ class ManagerController extends Controller
     public function getManagerProfile($id){
         $manager = User::where('id', $id)->first();
         $managerProfile = Manager::where('user_id', $id)->first();
+     
         $artistsManagedByManager = ArtistProfile::where('manager_id', $id)->get("user_id","name");
         $artistProfile = [];
         foreach($artistsManagedByManager as $artist){
