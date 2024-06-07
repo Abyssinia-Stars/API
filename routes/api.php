@@ -29,9 +29,11 @@ use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\ReportController;
 use App\Events\SendNotificationTry;
 use App\Events\TryMessage;
+use App\Http\Controllers\EventBlogsController;
 use App\Jobs\SendNotification;
 use App\Jobs\HandleMessage;
 use App\Models\ArtistProfile;
+use App\Models\EventBlogs;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -59,7 +61,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/profile', [UserProfileController::class, 'destroy']);
 
     Route::apiResource('/artists', ArtistProfileController::class)->only('store');
-    
+
     Route::prefix("manager")->middleware('manager')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ManagerController::class, 'handleResponse']);
@@ -113,16 +115,16 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get("/artist/offers", [OfferController::class, "showOffersByArtist"]);
     Route::put("/artist/offers/{id}/{status}", [OfferController::class, "acceptOffer"]);
-    
-    
-    //manager 
+
+
+    //manager
     Route::get('/manager/offers', [OfferController::class, 'showOffersByManager']);
     Route::delete("/manager/remove/{id}", [ManagerController::class , "removeManager"]);
     Route::delete("/artist/remove/{id}", [ManagerController::class, "removeArtist"]);
     Route::get('/manager/profile/{id}', [ManagerController::class, 'getManagerProfile']);
     Route::post("/manager", [ManagerController::class, "store"]);
     Route::get("manager/pendingRequest", [ManagerController::class, "pendingRequests"]);
-    
+
     //notification
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/{id}', [NotificationController::class, 'show']);
@@ -155,12 +157,12 @@ Route::middleware('auth:api')->group(function () {
     //test subscription
 
     Route::get("/premFeature", function () {
-        
+
         return response()->json([
             'message' => 'success'
-        ]); 
+        ]);
     })->middleware(SubscriptionMiddleware::class);
-    
+
 });
 
 Route::get("/plans", [PlansController::class, "index"]);
@@ -226,3 +228,6 @@ Route::controller(ResetPasswordController::class)->group(function () {
 Route::post('/upload-image', [UserProfileController::class, 'store']);
 
 Route::post('/google-callback', [GoogleLoginController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+Route::apiResource('/eventblogs', EventBlogsController::class);
