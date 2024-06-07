@@ -18,4 +18,9 @@ class EventBlogs extends Model
         'organizer_name',
         'image'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

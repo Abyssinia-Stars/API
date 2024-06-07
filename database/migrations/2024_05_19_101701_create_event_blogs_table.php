@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('event_blogs', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('title');
             $table->text('description');
             $table->date('event_date');
@@ -20,6 +22,7 @@ return new class extends Migration
             $table->string('location');
             $table->string('organizer_name');
             $table->string('image')->nullable();
+
             $table->timestamps();
         });
     }
