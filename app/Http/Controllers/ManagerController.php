@@ -221,6 +221,7 @@ class ManagerController extends Controller
     }
 
     public function pendingRequests(){
+        
         $notifications = Notification::where("notification_type", "request")->where("status", "unread")->get();
         $artistProfile = [];
 

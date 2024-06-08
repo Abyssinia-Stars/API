@@ -183,7 +183,7 @@ class OfferController extends Controller
                         'title' => 'New Offer',
                         'source_id' => $client_id,
                         'message' => 'You have a new offer',
-                        'type' => 'system',
+                        'notification_type' => 'system',
                         'status' => 'unread',
                 
                     
@@ -377,7 +377,8 @@ $balance->balance = $newbalance;
                 'title' => 'New Offer',
                 'source_id' => $artist_id,
                 'message' => 'Offer has been accepted',
-                'type' => 'system',
+                'notification_type' => 'system',
+             
                 'status' => 'unread',
         
             
@@ -467,7 +468,7 @@ $balance->balance = $newbalance;
                             'title' => 'Payment For Job',
                             'source_id' => $client_id,
                             'message' => 'You Have Successfully Completed The Job',
-                            'type' => 'offer',
+                            'notification_type' => 'system',
                             'status' => 'unread',
                     
                         
