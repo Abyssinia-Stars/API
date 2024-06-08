@@ -196,6 +196,7 @@ Route::controller(AuthController::class)->group(function () {
 
     Route::prefix("admin")->middleware("admin")->group(function () {
         Route::get("main_transactions", [AdminController::class, 'getMainTransactionsAndBalance']);
+        Route::get("stats", [AdminController::class, 'getStats']);
     });
 
     Route::post('/register', 'registerUser')->name('auth.register');

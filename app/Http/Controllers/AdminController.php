@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Offer;
+use Illuminate\Support\Facades\DB;
+use App\Models\Transaction;
+
 use App\Models\ArtistProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -89,6 +93,39 @@ class AdminController extends Controller
         $user->is_verified = true;
         $user->save();
         return response()->json($user);
+    }
+
+    public function getStats()
+    {
+        // total users
+        $totalUsers = User::where('role', '!=', 'admin')->count();
+        $activeJobs = Offer::where('status', 'active')->count();
+        $completedJobs = Offer::where('status', 'completed')->count();
+        $totalPayout = Offer::where('status', 'completed')->sum('price');
+        $pendingVerifications = User::where('is_verified', 'pending')->orderBy("created_at", "desc")->limit(10)->select(['id', 'name', 'email', 'role', 'created_at'])->get();
+
+        // new weekly signups
+        $weeklySignups = DB::table("users")->select(DB::raw('DATE_FORMAT(DATE_SUB(created_at, INTERVAL (WEEKDAY(created_at)) DAY), "%Y-%m-%d") as start, COUNT(*) as users_joined'))
+            ->groupBy('start')
+            ->orderBy('start')
+            ->get();
+        // new monthly signups
+        $monthlySignUps = DB::table('users')->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m-01") as start, COUNT(*) as users_joined'))
+            ->groupBy('start')
+            ->orderBy('start')
+            ->get();
+
+        return response()->json([
+            'totalUsers' => $totalUsers,
+            'activeJobs' => $activeJobs,
+            'completedJobs' => $completedJobs,
+            'totalPayout' => $totalPayout,
+            'signups' => [
+                'weekly' => $weeklySignups,
+                'monthly' => $monthlySignUps,
+            ],
+            'pendingVerifications' => $pendingVerifications
+        ]);
     }
 
     public function toggleIsActive(User $user)
