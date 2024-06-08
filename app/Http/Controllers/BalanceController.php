@@ -44,6 +44,8 @@ class BalanceController extends Controller
             ], 400);
         }
 
+        Log::info($payment_info);
+
         // Enter the details of the payment
         $data = [
         
@@ -61,34 +63,30 @@ class BalanceController extends Controller
             ]
         ];
 
+        
         $payment = Chapa::initializePayment($data);
-        return response()->json($payment, 200);
-
+        
+        
         if ($payment['status'] !== 'success') {
             return response()->json([
                 'message' => 'Something went really bad'
-            ], 500);
-        }
+                ], 500);
+                }
+            return response()->json($payment, 200);
 
         // Log::info(json_encode($payment));
-        return $payment['data'];
     }
 
-    /**
-     * Obtain Rave callback information
-     * @return void
-     */
+ 
     public function callback($reference, Request $request)
     {
         $data = Chapa::verifyTransaction($reference);
+        Log::info("here");
 
         
         $user_id = $request->input('user_id');
-        // $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-        // $out->writeln($data)
-        // return response()->json($data, 200);    
-        //if payment is successful
-        // Log::info(json_encode($data) . ' ' . $user_id);
+        Log::info($data);
+      
         $charge = $data['data']['charge'];
         $amount = $data['data']['amount'] - $charge;
         if ($data['status'] == 'success') {

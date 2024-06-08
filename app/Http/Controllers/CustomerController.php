@@ -129,6 +129,7 @@ class CustomerController extends Controller
 
 
     }
+
     public function getArtistByParams(Request $request)
     {
     
@@ -166,6 +167,230 @@ class CustomerController extends Controller
                     $query->where('name', 'like', "%$q%")
                         ->orWhere('email', 'like', "%$q%");
                 })->inRandomOrder()->get();
+                $artistProfiles = ArtistProfile::where(function ($query) use ($categories, $location, $gender, $price_rate) {
+                    if (in_array("all", $categories) && in_array("all", $location) && in_array("all", $gender) && in_array("all", $price_rate)) {
+                        return;
+                    }
+            
+                    if (in_array("all", $categories)) {
+                        if(!in_array("all", $location)){
+                            $query->where('location', $location[0]);
+                        }
+                        if(!in_array("all", $gender)){
+                            $query->where('gender', $gender[0]);
+                        }
+                        if(!in_array("all", $price_rate)){
+                            $priceSplitArray = explode('_', $price_rate[0]);
+                            if (count($priceSplitArray) == 2) {
+                                $minPrice = (int) $priceSplitArray[0];
+                                $maxPrice = (int) $priceSplitArray[1];
+                
+                                if (is_numeric($minPrice) && is_numeric($maxPrice)) {
+                                    $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice]);
+                                }
+                            }
+                        }
+                    }
+                    if(in_array("all", $location)){
+                        if(!in_array("all", $categories)){
+                            $query->whereJsonContains('category', $categories);
+                        }
+                     
+                        if(!in_array("all", $gender)){
+                            $query->where('gender', $gender[0]);
+                        }
+                        if(!in_array("all", $price_rate)){
+                            $priceSplitArray = explode('_', $price_rate[0]);
+                            if (count($priceSplitArray) == 2) {
+                                $minPrice = (int) $priceSplitArray[0];
+                                $maxPrice = (int) $priceSplitArray[1];
+                
+                                if (is_numeric($minPrice) && is_numeric($maxPrice)) {
+                                    $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice]);
+                                }
+                            }
+                        }   
+                    }
+                    if(in_array("all", $gender)){
+                        if(!in_array("all", $location)){
+                            $query->where('location', $location[0]);
+                        }
+                        if(!in_array("all", $categories)){
+                            $query->whereJsonContains('category', $categories);
+                        }
+                        if(!in_array("all", $price_rate)){
+                            $priceSplitArray = explode('_', $price_rate[0]);
+                            if (count($priceSplitArray) == 2) {
+                                $minPrice = (int) $priceSplitArray[0];
+                                $maxPrice = (int) $priceSplitArray[1];
+                
+                                if (is_numeric($minPrice) && is_numeric($maxPrice)) {
+                                    $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice]);
+                                }
+                            }
+                        }  
+                    }
+                    if(in_array("all", $price_rate)){
+                        if(!in_array("all", $location)){
+                            $query->where('location', $location[0]);
+                        }
+                        if(!in_array("all", $gender)){
+                            $query->where('gender', $gender[0]);
+                        }
+                        if(!in_array("all", $categories)){
+                            $query->whereJsonContains('category', $categories);
+                        }
+                    }
+        
+                    if(in_array("all", $categories) && in_array("all", $location)){
+                        if(!in_array("all", $gender)){
+                            $query->where('gender', $gender[0]);
+                        }
+                        if(!in_array("all", $price_rate)){
+                            $priceSplitArray = explode('_', $price_rate[0]);
+                            if (count($priceSplitArray) == 2) {
+                                $minPrice = (int) $priceSplitArray[0];
+                                $maxPrice = (int) $priceSplitArray[1];
+                
+                                if (is_numeric($minPrice) && is_numeric($maxPrice)) {
+                                    $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice]);
+                                }
+                            }
+                        }
+                    }
+        
+                    if(in_array("all", $categories) && in_array("all", $gender)){
+                        if(!in_array("all", $location)){
+                            $query->where('location', $location[0]);
+                        }
+                        if(!in_array("all", $price_rate)){
+                            $priceSplitArray = explode('_', $price_rate[0]);
+                            if (count($priceSplitArray) == 2) {
+                                $minPrice = (int) $priceSplitArray[0];
+                                $maxPrice = (int) $priceSplitArray[1];
+                
+                                if (is_numeric($minPrice) && is_numeric($maxPrice)) {
+                                    $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice]);
+                                }
+                            }
+                        }
+                    }
+        
+                    if(in_array("all", $categories) && in_array("all", $price_rate)){
+                        if(!in_array("all", $location)){
+                            $query->where('location', $location[0]);
+                        }
+                        if(!in_array("all", $gender)){
+                            $query->where('gender', $gender[0]);
+                        }
+                    }
+        
+                    if(in_array("all", $location) && in_array("all", $gender)){
+                        if(!in_array("all", $categories)){
+                            $query->whereJsonContains('category', $categories);
+                        }
+                        if(!in_array("all", $price_rate)){
+                            $priceSplitArray = explode('_', $price_rate[0]);
+                            if (count($priceSplitArray) == 2) {
+                                $minPrice = (int) $priceSplitArray[0];
+                                $maxPrice = (int) $priceSplitArray[1];
+                
+                                if (is_numeric($minPrice) && is_numeric($maxPrice)) {
+                                    $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice]);
+                                }
+                            }
+                        }
+                    }
+        
+                    if(in_array("all", $location) && in_array("all", $price_rate)){
+                        if(!in_array("all", $categories)){
+                            $query->whereJsonContains('category', $categories);
+                        }
+                        if(!in_array("all", $gender)){
+                            $query->where('gender', $gender[0]);
+                        }
+                    }
+        
+                    if(in_array("all", $gender) && in_array("all", $price_rate)){
+                        if(!in_array("all", $categories)){
+                            $query->whereJsonContains('category', $categories);
+                        }
+                        if(!in_array("all", $location)){
+                            $query->where('location', $location[0]);
+                        }
+                    }
+        
+                    if(in_array("all", $categories) && in_array("all", $location) && in_array("all", $gender)){
+                        if(!in_array("all", $price_rate)){
+                            $priceSplitArray = explode('_', $price_rate[0]);
+                            if (count($priceSplitArray) == 2) {
+                                $minPrice = (int) $priceSplitArray[0];
+                                $maxPrice = (int) $priceSplitArray[1];
+                
+                                if (is_numeric($minPrice) && is_numeric($maxPrice)) {
+                                    $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice]);
+                                }
+                            }
+                        }
+                    }
+        
+                    if(in_array("all", $categories) && in_array("all", $location) && in_array("all", $price_rate)){
+                        if(!in_array("all", $gender)){
+        
+                            $query->where('gender', $gender[0]);
+                        }
+                    }
+        
+                    if(in_array("all", $categories) && in_array("all", $gender) && in_array("all", $price_rate)){
+                        if(!in_array("all", $location)){
+                            $query->where('location', $location[0]);
+                        }
+                    }
+        
+                    if(in_array("all", $location) && in_array("all", $gender) && in_array("all", $price_rate)){
+                        if(!in_array("all", $categories)){
+                            $query->whereJsonContains('category', $categories);
+                        }
+                    }
+        
+                 
+                        
+        
+                 
+                   
+          
+                   
+                })
+                ->whereIn('user_id', $users->pluck('id'))
+                ->get();
+            
+                // Log::info($artistProfiles);
+        
+            
+                $averageRatings = [];
+            
+                $results = [];
+                foreach ($users as $user) {
+                    $profile = $artistProfiles->firstWhere('user_id', $user->id);
+                    // $ratings = $reviewProfiles->firstWhere('artist_id', $user->id);
+                    $averageRating = $this->calculateAverageRating($user);
+                    if (!$profile) {
+                        continue;
+                    }
+                    $results[] = [
+                        'user' => $user,
+                        'profile' => $profile,
+                        'rating' => $averageRating
+                    ];
+                }
+            
+                $results = collect($results)->forPage($page, $limit)->values();
+                return response()->json([
+                    'artists' => $results,
+                    'total' => count($results),
+                    'previousPage' => $page > 1,
+                    'nextPage' => $results->count() > $page + 1
+                ]);
         } else if (in_array('manager', $roles)) {
             $users = User::where('role', 'manager')
                 ->where('is_active', 1)
@@ -174,76 +399,41 @@ class CustomerController extends Controller
                     $query->where('name', 'like', "%$q%")
                         ->orWhere('email', 'like', "%$q%");
                 })->inRandomOrder()->get();
-        }
 
-    
 
-        $artistProfiles = ArtistProfile::where(function ($query) use ($categories, $location, $gender, $price_rate) {
-            if (in_array("all", $categories) && in_array("all", $location) && in_array("all", $gender) && in_array("all", $price_rate)) {
-                return;
-            }
-    
-            $query->whereJsonContains('category', $categories)
-            ->orWhere('location', $location[0])
-            ->orWhere(function ($query) use ($price_rate) {
-                
-                if (!in_array("all", $price_rate)) {
-                    if (!empty($price_rate) && count($price_rate) > 0) {
-                        $priceSplitArray = explode('_', $price_rate[0]);
-                        if (count($priceSplitArray) == 2) {
-                            $minPrice = (int) $priceSplitArray[0];
-                            $maxPrice = (int) $priceSplitArray[1];
-        
-            
-                            if (is_numeric($minPrice) && is_numeric($maxPrice)) {
-                                  $result = $query->whereBetween('price_rate', [(int)$minPrice, (int)$maxPrice])->get();
-                                  
-                             
-                            }
-                        }
+                $managerProfiles  = Manager::where(function ($query) use ($categories, $location, $gender, $price_rate) {
+                    if (in_array("all", $categories) && in_array("all", $location) && in_array("all", $gender)) {
+                        return;
                     }
+            
+                })->whereIn('user_id', $users->pluck('id'))->get();
+              
+                            
+                $results = [];
+                foreach ($users as $user) {
+                    $profile = $managerProfiles->firstWhere('user_id', $user->id);
+                
+                    if (!$profile) {
+                        continue;
+                    }
+                    $results[] = [
+                        'user' => $user,
+                        'profile' => $profile,
+                      
+                    ];
                 }
-            })
-            ->orWhere('gender', $gender[0]);
-            $sql = $query->toSql();
-            $bindings = $query->getBindings();
-    
-    $fullSql = vsprintf(str_replace('?', '%s', $sql), $bindings);
-    
-    Log::info($fullSql);
-        
-           
-        })
-        ->whereIn('user_id', $users->pluck('id'))
-        ->get();
-    
-        // Log::info($artistProfiles);
+            
+                $results = collect($results)->forPage($page, $limit)->values();
+                return response()->json([
+                    'artists' => $results,
+                    'total' => count($results),
+                    'previousPage' => $page > 1,
+                    'nextPage' => $results->count() > $page + 1
+                ]);
 
-    
-        $averageRatings = [];
-    
-        $results = [];
-        foreach ($users as $user) {
-            $profile = $artistProfiles->firstWhere('user_id', $user->id);
-            // $ratings = $reviewProfiles->firstWhere('artist_id', $user->id);
-            $averageRating = $this->calculateAverageRating($user);
-            if (!$profile) {
-                continue;
-            }
-            $results[] = [
-                'user' => $user,
-                'profile' => $profile,
-                'rating' => $averageRating
-            ];
         }
-    
-        $results = collect($results)->forPage($page, $limit)->values();
-        return response()->json([
-            'artists' => $results,
-            'total' => count($results),
-            'previousPage' => $page > 1,
-            'nextPage' => $results->count() > $page + 1
-        ]);
+        
+
     }
     
 
@@ -359,7 +549,7 @@ class CustomerController extends Controller
         ->first();
         if($reviewAlreadyExists){
             return response()->json([
-                'message' => 'Review already exists'
+                'message' => 'Review already exists for user and work'
             ], 400);
         }
         try{

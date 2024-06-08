@@ -195,8 +195,7 @@ class ArtistProfileController extends Controller
             'created_at', 'updated_at', 'artist_id', 'client_id', 'offer_point_required', 'work_id'
         ]);
 
-        
-       
+
         $offersWithJobTitle = [];
 
         if(count($completedOffers) > 0){
@@ -205,6 +204,7 @@ class ArtistProfileController extends Controller
                 $job = array_merge($offer->toArray(), ['job_description' => Work::where('id', $offer->work_id)->first(['title','catagory','description','from_date','to_date'])
                 ->toArray()]);
                 $review = Review::where('work_id', $offer->work_id)->first();
+              
                 if($review){
                     $job = array_merge($job, ['review' => $review->toArray()]);
                 }

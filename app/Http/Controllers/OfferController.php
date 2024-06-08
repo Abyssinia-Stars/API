@@ -140,10 +140,14 @@ class OfferController extends Controller
         
         try {
             
-            $offerAlreadyExists = Offer::where('work_id', $request->work_id)->where("artist_id", $request->artist_id)->first();
+            $offerAlreadyExists = Offer::where('work_id', $request->work_id)->where("artist_id", $request->artist_id)
+            ->where("status","pending")
+            ->first();
+
+            Log::info($offerAlreadyExists);
             if($offerAlreadyExists){
 
-                return response()->json(['message' => "You can't send more than one offer per job"],409);
+                return response()->json(['message' => "Offer Already Exists for user"],409);
             }
             $balance = Balance::where('user_id', $client_id)->first();
             // Log::info($balance);
@@ -155,7 +159,7 @@ class OfferController extends Controller
             $balance->onhold_balance = $balance->onhold_balance +  $request->price;
             $balance->save();
             $offerPointRequired = $request->price * 0.01;
-            // $client_id = Auth::user()->id;
+
             $artistProfile = ArtistProfile::where('user_id', $request->artist_id)->first();
            
                 if($artistProfile->offfer_point < $offerPointRequired){
@@ -340,6 +344,9 @@ class OfferController extends Controller
         
         $offer = Offer::where('id', $id)->where('artist_id', $artistProfile->user_id)
         ->first();
+        if(!$offer){
+            return response()->json(['message' => 'Offer not found'], 404);
+        }
  
         if($artistProfile->offfer_point < $offer->offer_point_required){
             return response()->json(['message' => 'You do not have enough offer points'], 400);
