@@ -382,22 +382,26 @@ $results = collect($results)->forPage($page, $limit)->values();
         // Get user IDs from the rotated profiles
         $userIds = $rotatedProfiles->pluck('user_id');
 
-        // Fetch the corresponding users
-        $artists = User::whereIn('id', $userIds)->get();
+        // Fetch the corresponding users in the order of rotated profiles
+        $artists = User::whereIn('id', $userIds)->get()->keyBy('id');
+
+        // Log the user IDs fetched
+        Log::info('Fetched User IDs: ', $artists->pluck('id')->toArray());
 
         // Prepare the artists with their profiles and ratings
         $artistsWithRating = [];
-        foreach ($artists as $artist) {
+        foreach ($rotatedProfiles as $profile) {
+            $artist = $artists->get($profile->user_id);
             $averageRating = $this->calculateAverageRating($artist);
-            $profile = $rotatedProfiles->firstWhere('user_id', $artist->id);
-            if ($profile) {
-                $artistsWithRating[] = [
-                    'artist' => $artist,
-                    'rating' => $averageRating,
-                    'profile' => $profile,
-                ];
-            }
+            $artistsWithRating[] = [
+                'artist' => $artist,
+                'rating' => $averageRating,
+                'profile' => $profile,
+            ];
         }
+
+        // Log the final order of the artists to be returned
+        Log::info('Final Artists Order in Response: ', collect($artistsWithRating)->pluck('artist.id')->toArray());
 
         // Update the last shown artist in the database
         DB::table('rotation_state')->updateOrInsert(
