@@ -148,7 +148,7 @@ class OfferController extends Controller
             $balance = Balance::where('user_id', $client_id)->first();
             // Log::info($balance);
             if($balance->balance < $request->price ){
-                return response()->json(['message' => 'Insufficient Balance']);
+                return response()->json(['message' => 'Insufficient Balance'],400);
             }
 
             $balance->balance = $balance->balance -  $request->price; 
