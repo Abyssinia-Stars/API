@@ -3,17 +3,18 @@
 namespace App\Http\Controllers;
 
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Favorites;
-use App\Models\Review;
-use App\Models\ArtistProfile;
 use App\Models\Offer;
+use App\Models\Review;
+use App\Models\Favorites;
+use Illuminate\Http\Request;
+use App\Models\ArtistProfile;
 use Illuminate\Support\Facades\DB;
 
 
 
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
@@ -375,6 +376,9 @@ $results = collect($results)->forPage($page, $limit)->values();
         // Rotate the artist profiles array
         $rotatedProfiles = $artistProfiles->slice($nextIndex)->merge($artistProfiles->slice(0, $nextIndex));
 
+        // Log the order of the rotated profiles for debugging
+        Log::info('Rotated Profiles Order: ', $rotatedProfiles->pluck('user_id')->toArray());
+
         // Get user IDs from the rotated profiles
         $userIds = $rotatedProfiles->pluck('user_id');
 
@@ -402,41 +406,6 @@ $results = collect($results)->forPage($page, $limit)->values();
         );
 
         return response()->json(['artists' => $artistsWithRating]);
-    }
-
-    // Debugging Helper Function
-    public function debugVerifiedArtists()
-    {
-        // Get artist profiles that are subscribed
-        $artistProfiles = ArtistProfile::where('is_subscribed', true)->get();
-
-        if ($artistProfiles->isEmpty()) {
-            return response()->json(['artists' => []]);
-        }
-
-        // Retrieve the last shown artist id from the database
-        $rotationState = DB::table('rotation_state')->first();
-        $lastArtistId = $rotationState ? $rotationState->last_artist_id : null;
-
-        // Find the index of the last shown artist
-        $lastIndex = $artistProfiles->search(function ($profile) use ($lastArtistId) {
-            return $profile->user_id == $lastArtistId;
-        });
-
-        // Calculate the next index
-        $nextIndex = $lastIndex !== false ? ($lastIndex + 1) % $artistProfiles->count() : 0;
-
-        // Rotate the artist profiles array
-        $rotatedProfiles = $artistProfiles->slice($nextIndex)->merge($artistProfiles->slice(0, $nextIndex));
-
-        // Debugging Output
-        return response()->json([
-            'rotation_state' => $rotationState,
-            'lastArtistId' => $lastArtistId,
-            'lastIndex' => $lastIndex,
-            'nextIndex' => $nextIndex,
-            'rotatedProfiles' => $rotatedProfiles->toArray(),
-        ]);
     }
 
 
