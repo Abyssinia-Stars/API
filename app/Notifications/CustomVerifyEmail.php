@@ -74,7 +74,7 @@ class CustomVerifyEmail extends Notification
     
 
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
+                    ->line('There has been a request to verify OTP')
                     ->action('Notification Action',$verificationUrl)
                     ->line("Your OTP is " . $otp->token )
                     ->line('Thank you for using our application!');
