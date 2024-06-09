@@ -66,12 +66,14 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/send-request/{userId}', [ManagerController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ManagerController::class, 'handleResponse']);
         Route::get('/', [ManagerController::class, 'getNotifications']);
+        Route::get("stats", [ManagerController::class, 'getStats']);
     });
 
     Route::prefix("artist")->middleware('artist')->group(function () {
         Route::post('/send-request/{userId}', [ArtistProfileController::class, 'sendRequest']);
         Route::post('/response/{notificationId}', [ArtistProfileController::class, 'handleResponse']);
         Route::get('/', [ArtistProfileController::class, 'getNotifications']);
+        Route::get("stats", [ArtistProfileController::class, 'getStats']);
     });
     Route::prefix('customer')->middleware('customer')->group(function () {
         Route::apiResource('/artists', ArtistProfileController::class)->only('index', 'show');
@@ -88,9 +90,9 @@ Route::middleware('auth:api')->group(function () {
         Route::delete("reviews/{userId}", [CustomerController::class, 'removeReview']);
         Route::get("reviews", [CustomerController::class, 'getReviews']);
         Route::get('/artist/profile/{id}/{auth}', [ArtistProfileController::class, 'getArtistProfileWithAuth']);
-    Route::get("/offers/{id}", [OfferController::class, "showOffersByClient"]);
-    Route::delete("/offers/{id}", [OfferController::class, "destroy"]);
-    Route::put("/jobs/{id}/completed", [OfferController::class, "jobIsOver"]);
+        Route::get("/offers/{id}", [OfferController::class, "showOffersByClient"]);
+        Route::delete("/offers/{id}", [OfferController::class, "destroy"]);
+        Route::put("/jobs/{id}/completed", [OfferController::class, "jobIsOver"]);
 
     });
 
@@ -119,7 +121,7 @@ Route::middleware('auth:api')->group(function () {
 
     //manager
     Route::get('/manager/offers', [OfferController::class, 'showOffersByManager']);
-    Route::delete("/manager/remove/{id}", [ManagerController::class , "removeManager"]);
+    Route::delete("/manager/remove/{id}", [ManagerController::class, "removeManager"]);
     Route::delete("/artist/remove/{id}", [ManagerController::class, "removeArtist"]);
     Route::get('/manager/profile/{id}', [ManagerController::class, 'getManagerProfile']);
     Route::post("/manager", [ManagerController::class, "store"]);
