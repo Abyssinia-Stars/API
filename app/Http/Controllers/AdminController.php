@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Offer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 use App\Models\Transaction;
 
 use App\Models\ArtistProfile;
@@ -169,13 +171,18 @@ class AdminController extends Controller
     public function setVerificationStatus(User $user, Request $request)
     {
 
-        $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-        // $out->writeln($request->all());
-        // $user = auth()->user();
-
-        $request->validate([
+    
+        $validate = Validator::make($request->all(), [
             "is_verified" => "required|in:pending,unverified,verified"
+           
         ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'message' => 'Bad Request',
+                'errors' => $validate->errors()
+            ], 400);
+        }
 
         $user->is_verified = $request->is_verified;
 
