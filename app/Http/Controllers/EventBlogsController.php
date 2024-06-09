@@ -38,7 +38,6 @@ class EventBlogsController extends Controller
     {
         // Validate the request
 
-        Log::info($request->all());
         $validation = Validator::make($request->all(), [
             'user_id' => 'required', // 'user_id' is required
             'title' => 'required',

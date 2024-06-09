@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Favorites;
+use App\Models\Manager;
 use App\Models\Review;
 use App\Models\ArtistProfile;
 use App\Models\Offer;
@@ -435,6 +436,7 @@ class CustomerController extends Controller
         
 
     }
+    
     
 
     public function addArtistToFavorites($userId){
