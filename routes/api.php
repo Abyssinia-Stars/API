@@ -1,42 +1,43 @@
 <?php
 
-use App\Http\Middleware\SubscriptionMiddleware;
-
-use App\Http\Controllers\PaymentInfoController;
-use App\Http\Controllers\PlansController;
-use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\TxnHistoryController;
 use App\Models\Offer;
+
+use App\Events\TryMessage;
+use App\Models\EventBlogs;
+use App\Jobs\HandleMessage;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
+use App\Models\ArtistProfile;
+use App\Jobs\SendNotification;
+use App\Events\SendNotificationTry;
+use App\Http\Controllers\Statstics;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\PlansController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BalanceController;
+use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\EventBlogsController;
+use App\Http\Controllers\TxnHistoryController;
+use App\Http\Controllers\PaymentInfoController;
+use App\Http\Middleware\SubscriptionMiddleware;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\ArtistProfileController;
+use App\Http\Controllers\ConversationsController;
 use App\Http\Controllers\Auth\OtpVerifyController;
 use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\FileUpload\UserProfileController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\ManagerController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\ConversationsController;
-use App\Http\Controllers\MessagesController;
-use App\Http\Controllers\ReportController;
-use App\Events\SendNotificationTry;
-use App\Events\TryMessage;
-use App\Http\Controllers\EventBlogsController;
-use App\Jobs\SendNotification;
-use App\Jobs\HandleMessage;
-use App\Models\ArtistProfile;
-use App\Models\EventBlogs;
-use App\Models\Subscription;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -234,3 +235,4 @@ Route::post('/google-callback', [GoogleLoginController::class, 'handleGoogleCall
 
 
 Route::apiResource('/eventblogs', EventBlogsController::class);
+Route::apiResource('/stat', Statstics::class);
